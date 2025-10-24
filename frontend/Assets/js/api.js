@@ -1,11 +1,13 @@
+// Import configuration
+import { BACKEND_URL } from '../../config.js';
 // =============================================
 // Backend API Integration
 // =============================================
 
 // API Configuration
 const API_CONFIG = {
-    BASE_URL: 'http://localhost:3000/api',
-    SOCKET_URL: 'http://localhost:3000',
+    BASE_URL: `${BACKEND_URL}/api`,
+    SOCKET_URL: BACKEND_URL,
     TIMEOUT: 10000
 };
 
