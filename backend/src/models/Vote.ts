@@ -37,7 +37,7 @@ export class Vote {
   @Column({ type: 'text', nullable: true })
   verificationHash?: string; // For vote integrity verification
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'json', nullable: true })
   metadata?: object; // Additional vote metadata
 
   @Column({ type: 'inet', nullable: true })

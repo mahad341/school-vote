@@ -4,10 +4,10 @@ import { config } from 'dotenv';
 config();
 
 export const AppDataSource = new DataSource({
-  type: 'postgres',
+  type: 'mysql',
   host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT || '5432'),
-  username: process.env.DB_USERNAME,
+  port: parseInt(process.env.DB_PORT || '3306'),
+  username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   synchronize: process.env.NODE_ENV === 'development',
@@ -15,6 +15,8 @@ export const AppDataSource = new DataSource({
   entities: ['src/models/**/*.ts'],
   migrations: ['src/migrations/**/*.ts'],
   subscribers: ['src/subscribers/**/*.ts'],
+  charset: 'utf8mb4',
+  timezone: '+00:00',
 });
 
 export const connectDatabase = async () => {

@@ -8,12 +8,7 @@
     "start": "node dist/server.js",
     "dev": "nodemon --exec tsx src/server.ts",
     "build": "tsc",
-    "test": "jest",
-    "typeorm": "typeorm-ts-node-esm",
-    "migration:run": "npm run typeorm migration:run -- -d src/config/database.ts",
-    "migration:generate": "npm run typeorm migration:generate -- -d src/config/database.ts",
-    "migration:create": "npm run typeorm migration:create",
-    "migration:revert": "npm run typeorm migration:revert -- -d src/config/database.ts"
+    "clean": "rimraf dist node_modules"
   },
   "keywords": [
     "e-voting",
@@ -37,7 +32,7 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.0",
-    "pg": "^8.11.3",
+    "mysql2": "^3.6.5",
     "redis": "^4.6.10",
     "reflect-metadata": "^0.2.2",
     "socket.io": "^4.7.4",

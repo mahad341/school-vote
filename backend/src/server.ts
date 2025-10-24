@@ -33,7 +33,7 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: {
     origin: process.env.CORS_ORIGIN || "http://localhost:3000",
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST", "PUT", "DELETE"]
   }
 });
 
@@ -87,7 +87,7 @@ app.use('/api/realtime/voting-status', cacheMiddleware(30)); // 30 seconds
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({
-    status: 'OK',
+    status: 'ok',
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   });
