@@ -1,0 +1,151 @@
+Student ID,Full Name,Class and Stream,House
+25-001,Jane Nabwire,F1 South,Kakungulu House
+25-002,James Balikuddembe,F1 East,Kakungulu House
+25-003,David Mugisha,F1 North,Agakhan House
+25-004,Peter Mirembe,F1 North,Kakungulu House
+25-005,Emily Ssewankambo,F1 Central,Agakhan House
+25-006,Mary Kisakye,F1 East,Agakhan House
+25-007,James Mirembe,F1 East,Luwangula House
+25-008,James Okello,F1 East,Agakhan House
+25-009,Peter Mugisha,F1 South,Africa House
+25-010,Mary Balikuddembe,F1 North,Luwangula House
+25-011,Jane Namaganda,F1 West,Africa House
+25-012,Mary Mirembe,F1 North,Kakungulu House
+25-013,Emily Mugisha,F1 South,Kakungulu House
+25-014,Jane Kisakye,F1 East,Africa House
+25-015,Grace Nansubuga,F1 South,Kakungulu House
+25-016,David Namaganda,F1 East,Africa House
+25-017,Grace Balikuddembe,F1 North,Luwangula House
+25-018,Paul Ssewankambo,F1 Central,Luwangula House
+25-019,Alice Nansubuga,F1 North,Agakhan House
+25-020,Alice Kisakye,F1 West,Luwangula House
+25-021,David Namaganda,F1 North,Kakungulu House
+25-022,David Balikuddembe,F1 East,Kakungulu House
+25-023,Alice Balikuddembe,F1 West,Kakungulu House
+25-024,David Kato,F1 South,Luwangula House
+25-025,Grace Mugisha,F1 North,Kakungulu House
+25-026,Peter Mirembe,F2 East,Luwangula House
+25-027,Grace Mirembe,F2 East,Africa House
+25-028,Paul Balikuddembe,F2 Central,Africa House
+25-029,Peter Ssewankambo,F2 North,Kakungulu House
+25-030,John Mirembe,F2 South,Africa House
+25-031,Jane Mirembe,F2 Central,Kakungulu House
+25-032,Emily Nabwire,F2 East,Agakhan House
+25-033,Peter Balikuddembe,F2 East,Africa House
+25-034,Paul Mirembe,F2 Central,Agakhan House
+25-035,Grace Nabwire,F2 North,Agakhan House
+25-036,Mary Balikuddembe,F2 East,Agakhan House
+25-037,David Nabwire,F2 North,Kakungulu House
+25-038,Grace Ssewankambo,F2 East,Agakhan House
+25-039,Grace Kisakye,F2 South,Agakhan House
+25-040,Alice Mugisha,F2 West,Agakhan House
+25-041,John Okello,F2 West,Kakungulu House
+25-042,Peter Nansubuga,F2 Central,Kakungulu House
+25-043,Peter Mugisha,F2 North,Agakhan House
+25-044,Paul Namaganda,F2 East,Agakhan House
+25-045,Grace Mirembe,F2 West,Africa House
+25-046,Grace Okello,F2 Central,Agakhan House
+25-047,Jane Ssewankambo,F2 North,Kakungulu House
+25-048,Grace Mugisha,F2 West,Kakungulu House
+25-049,Mary Namaganda,F2 West,Luwangula House
+25-050,Peter Ssewankambo,F2 North,Luwangula House
+25-051,Grace Namaganda,F3 North,Luwangula House
+25-052,Peter Kato,F3 Central,Africa House
+25-053,Mary Mugisha,F3 West,Agakhan House
+25-054,Jane Nansubuga,F3 South,Africa House
+25-055,Mary Nabwire,F3 West,Agakhan House
+25-056,Alice Balikuddembe,F3 East,Agakhan House
+25-057,Peter Namaganda,F3 East,Luwangula House
+25-058,Emily Namaganda,F3 West,Luwangula House
+25-059,Mary Nansubuga,F3 Central,Agakhan House
+25-060,James Okello,F3 Central,Kakungulu House
+25-061,Peter Kisakye,F3 Central,Agakhan House
+25-062,John Mugisha,F3 Central,Agakhan House
+25-063,John Nabwire,F3 West,Kakungulu House
+25-064,Jane Mugisha,F3 Central,Kakungulu House
+25-065,Paul Kisakye,F3 East,Africa House
+25-066,John Kato,F3 West,Africa House
+25-067,Grace Nansubuga,F3 North,Agakhan House
+25-068,Emily Nansubuga,F3 Central,Africa House
+25-069,David Nansubuga,F3 Central,Agakhan House
+25-070,Paul Kisakye,F3 South,Africa House
+25-071,Emily Mugisha,F3 Central,Agakhan House
+25-072,David Kato,F3 West,Agakhan House
+25-073,Paul Kisakye,F3 Central,Kakungulu House
+25-074,Emily Nansubuga,F3 Central,Kakungulu House
+25-075,Grace Nansubuga,F3 North,Africa House
+25-076,Paul Okello,F4 Central,Africa House
+25-077,Peter Balikuddembe,F4 West,Luwangula House
+25-078,Peter Nabwire,F4 Central,Africa House
+25-079,John Mugisha,F4 Central,Luwangula House
+25-080,Jane Kato,F4 South,Africa House
+25-081,James Mirembe,F4 East,Agakhan House
+25-082,John Mugisha,F4 Central,Africa House
+25-083,James Kato,F4 East,Agakhan House
+25-084,Mary Okello,F4 West,Agakhan House
+25-085,Mary Ssewankambo,F4 East,Luwangula House
+25-086,David Mugisha,F4 South,Luwangula House
+25-087,James Nabwire,F4 East,Luwangula House
+25-088,John Namaganda,F4 South,Agakhan House
+25-089,Paul Ssewankambo,F4 South,Africa House
+25-090,Alice Nabwire,F4 South,Agakhan House
+25-091,James Kisakye,F4 South,Agakhan House
+25-092,Mary Nabwire,F4 Central,Agakhan House
+25-093,Peter Namaganda,F4 North,Kakungulu House
+25-094,Alice Mugisha,F4 East,Kakungulu House
+25-095,Alice Kisakye,F4 West,Kakungulu House
+25-096,Jane Kisakye,F4 East,Agakhan House
+25-097,James Kato,F4 North,Luwangula House
+25-098,Paul Namaganda,F4 West,Africa House
+25-099,James Nabwire,F4 South,Africa House
+25-100,John Ssewankambo,F4 Central,Agakhan House
+25-101,Mary Namaganda,F5 Sciences B,Agakhan House
+25-102,Alice Kisakye,F5 Sciences B,Agakhan House
+25-103,James Mirembe,F5 Arts,Agakhan House
+25-104,Mary Okello,F5 Sciences B,Kakungulu House
+25-105,Mary Mirembe,F5 Sciences B,Agakhan House
+25-106,David Nabwire,F5 Sciences A,Agakhan House
+25-107,Emily Kisakye,F5 Arts,Africa House
+25-108,James Kato,F5 Arts,Africa House
+25-109,Alice Nabwire,F5 Sciences A,Agakhan House
+25-110,Paul Mirembe,F5 Arts,Agakhan House
+25-111,Alice Mirembe,F5 Sciences A,Kakungulu House
+25-112,Alice Namaganda,F5 Sciences A,Agakhan House
+25-113,John Nansubuga,F5 Sciences B,Kakungulu House
+25-114,Mary Ssewankambo,F5 Sciences A,Africa House
+25-115,Emily Ssewankambo,F5 Sciences A,Kakungulu House
+25-116,Paul Nabwire,F5 Arts,Kakungulu House
+25-117,Alice Ssewankambo,F5 Sciences B,Kakungulu House
+25-118,Emily Mugisha,F5 Sciences B,Kakungulu House
+25-119,Peter Namaganda,F5 Sciences A,Agakhan House
+25-120,Mary Mugisha,F5 Sciences A,Luwangula House
+25-121,Alice Balikuddembe,F5 Sciences A,Africa House
+25-122,Peter Nabwire,F5 Sciences A,Africa House
+25-123,Grace Mirembe,F5 Sciences B,Luwangula House
+25-124,David Okello,F5 Sciences B,Kakungulu House
+25-125,Emily Okello,F5 Arts,Africa House
+25-126,Jane Ssewankambo,F6 Sciences B,Luwangula House
+25-127,Mary Mirembe,F6 Sciences B,Agakhan House
+25-128,Peter Ssewankambo,F6 Arts,Africa House
+25-129,Emily Nabwire,F6 Sciences A,Africa House
+25-130,Alice Balikuddembe,F6 Sciences A,Agakhan House
+25-131,Grace Mugisha,F6 Arts,Agakhan House
+25-132,James Kato,F6 Sciences B,Africa House
+25-133,John Kisakye,F6 Sciences B,Africa House
+25-134,Alice Nansubuga,F6 Arts,Luwangula House
+25-135,Emily Nansubuga,F6 Sciences A,Agakhan House
+25-136,Grace Balikuddembe,F6 Arts,Agakhan House
+25-137,David Nabwire,F6 Sciences B,Agakhan House
+25-138,James Mugisha,F6 Sciences A,Luwangula House
+25-139,Jane Namaganda,F6 Sciences B,Agakhan House
+25-140,Peter Nansubuga,F6 Arts,Kakungulu House
+25-141,Grace Kato,F6 Sciences A,Agakhan House
+25-142,Peter Balikuddembe,F6 Sciences B,Africa House
+25-143,Alice Kato,F6 Sciences A,Africa House
+25-144,Mary Kato,F6 Sciences A,Agakhan House
+25-145,John Okello,F6 Sciences B,Africa House
+25-146,John Kisakye,F6 Sciences B,Luwangula House
+25-147,Mary Nabwire,F6 Sciences B,Luwangula House
+25-148,James Balikuddembe,F6 Sciences B,Luwangula House
+25-149,James Okello,F6 Sciences B,Africa House
+25-150,Grace Namaganda,F6 Sciences A,Africa House

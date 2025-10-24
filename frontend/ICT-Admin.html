@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICT Admin Dashboard - School E-Voting System</title>
+    <link rel="stylesheet" href="Assets/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="Assets/css/style.css">
+    <!-- Font Awesome 6.7.2 CSS Links -->
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/all.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/brands.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/brands.min.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/fontawesome.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/fontawesome.min.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/regular.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/regular.min.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/solid.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/solid.min.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/svg-with-js.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/svg-with-js.min.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/v4-font-face.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/v4-font-face.min.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/v4-shims.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/v4-shims.min.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/v5-font-face.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/v5-font-face.min.css">
+</head>
+<body>
+    <div id="ict-admin-module" class="container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">
+                    <!-- <i class="fas fa-shield-halved"></i> -->
+                     <img src="Assets/images/kibuli-secondary-school-kss-seeklogo.png" alt="E-Vote Logo" class="e-vote-icon" style="width:40px;height:40px;">
+                </div>
+                <div class="logo-text">Kibuli Secondary School</div>
+            </div>
+            
+            <div class="menu-item active" data-target="dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="menu-item" data-target="admin-management">
+                <i class="fas fa-users-cog"></i>
+                <span>Admin Management</span>
+            </div>
+            <div class="menu-item" data-target="student-data">
+                <i class="fas fa-users"></i>
+                <span>Student Data</span>
+            </div>
+            <div class="menu-item" data-target="voter-logs">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Voter Logs</span>
+            </div>
+            <div class="menu-item" data-target="system-performance">
+                <i class="fas fa-chart-line"></i>
+                <span>System Performance</span>
+            </div>
+            <div class="menu-item" data-target="audit-trail">
+                <i class="fas fa-history"></i>
+                <span>Audit Trail</span>
+            </div>
+            <div class="menu-item" data-target="system-reset">
+                <i class="fas fa-bomb"></i>
+                <span>System Reset</span>
+            </div>
+            <div class="menu-item" data-target="backup-recovery">
+                <i class="fas fa-database"></i>
+                <span>Backup & Recovery</span>
+            </div>
+            <div class="menu-item" data-target="system-status">
+                <i class="fas fa-power-off"></i>
+                <span>System Status</span>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <div class="hamburger-menu" id="hamburger-menu">
+                        <i class="fas fa-bars"></i>
+                    </div>
+                    <div class="header-title">ICT Admin Dashboard</div>
+                </div>
+                <div class="header-actions">
+                    <div class="theme-toggle" id="ict-theme-toggle">
+                        <i class="fas fa-sun"></i>
+                        <div class="toggle-slider"></div>
+                        <i class="fas fa-moon"></i>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-avatar">IT</div>
+                        <div>
+                            <div>ICT Admin</div>
+                            <div class="user-role">Superuser</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dashboard Content -->
+            <div id="ict-dashboard-content" class="content-section">
+                <!-- ICT Dashboard content loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="Assets/js/app.js"></script>
+    <script src="Assets/js/ict-admin.js"></script>
+</body>
+</html>

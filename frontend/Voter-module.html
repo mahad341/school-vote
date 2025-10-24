@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School E-Voting System</title>
+    <link rel="stylesheet" href="Assets/css/all.min.css">
+    <link rel="stylesheet" href="Assets/css/style.css">
+    <!-- Font Awesome 6.7.2 CSS Links -->
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/all.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/brands.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/brands.min.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/fontawesome.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/fontawesome.min.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/regular.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/regular.min.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/solid.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/solid.min.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/svg-with-js.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/svg-with-js.min.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/v4-font-face.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/v4-font-face.min.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/v4-shims.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/v4-shims.min.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/v5-font-face.css">
+    <link rel="stylesheet" href="Assets/fontawesome-free-6.7.2-web/css/v5-font-face.min.css">
+</head>
+<body>
+    <div class="voter-container">
+        <div class="voter-header">
+            <div class="logo">
+                <img src="Assets/images/kibuli-secondary-school-kss-seeklogo.png" alt="E-Vote Logo" class="e-vote-icon" style="width:40px;height:40px;margin-right: 10px;">
+                <div class="logo-text">Kibuli Secondary School</div>
+            </div>
+            <div class="header-actions">
+                <div class="theme-toggle" id="voter-theme-toggle">
+    <i class="fas fa-sun"></i>
+    <div class="toggle-slider"></div>
+    <i class="fas fa-moon"></i>
+</div>
+            </div>
+        </div>
+
+        <!-- Voter Module -->
+        <div id="voter-module">
+            <!-- Authentication Screen -->
+            <div id="auth-screen" class="auth-screen">
+                <div class="auth-header">
+                    <!-- <div class="auth-logo"> -->
+                        <!-- <i class="fas fa-user-check"></i> -->
+                         <img src="Assets/images/kibuli-secondary-school-kss-seeklogo.png" alt="E-Vote Logo" class="e-vote-icon" style="width: 190px;height: 185px;">
+                    <!-- </div> -->
+                    <h1>Student Authentication</h1>
+                    <p>Verify your identity to begin voting</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="voter-student-id">Student ID</label>
+                    <input type="text" id="voter-student-id" placeholder="Enter your student ID">
+                </div>
+                
+                <div class="form-group">
+                    <label for="voter-name">Full Name</label>
+                    <input type="text" id="voter-name" class="read-only" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="voter-class">Class</label>
+                    <input type="text" id="voter-class" class="read-only" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="voter-house">House</label>
+                    <input type="text" id="voter-house" class="read-only" readonly>
+                </div>
+                
+                <button id="auth-continue" class="btn btn-primary" style="margin-top: 20px; padding: 15px;" disabled>Continue to Voting</button>
+            </div>
+            
+            <!-- Guidelines Screen -->
+            <div id="guidelines-screen" class="auth-screen" style="display: none;">
+                <div class="auth-header">
+                    <h1>Voting Guidelines</h1>
+                    <p>Please read carefully before proceeding</p>
+                </div>
+                
+                <div id="guidelines-content" class="guidelines-container" style="margin-bottom: 20px;">
+                    <!-- Guidelines loaded from database -->
+                </div>
+                
+                <div class="checkbox-group" style="margin-top: 40px;">
+                    <input type="checkbox" id="guidelines-agree">
+                    <label for="guidelines-agree">I have read, understood, and agree to follow the voting guidelines above.</label>
+                </div>
+                
+                <button id="guidelines-continue" class="btn btn-primary" style="margin-top: 20px; padding: 15px;" disabled>Proceed to Voting</button>
+            </div>
+            
+            <!-- Ballot Screen -->
+            <div id="ballot-screen" class="auth-screen" style="display: none;">
+                <div class="auth-header">
+                    <h1 id="post-title">School President</h1>
+                    <p>Select one candidate for this position</p>
+                </div>
+                
+                <div class="progress-bar">
+                    <span>Step <span id="current-step">1</span> of <span id="total-steps">4</span></span>
+                    <div class="progress-steps">
+                        <div class="step active"></div>
+                        <div class="step"></div>
+                        <div class="step"></div>
+                        <div class="step"></div>
+                    </div>
+                </div>
+                
+                <div id="candidates-container" class="candidates-grid">
+                    <!-- Candidate cards loaded from database -->
+                </div>
+                
+                <div class="selection-confirm" style="margin-top: 50px;margin-bottom: 20px;">
+                    <input type="checkbox" id="confirm-selection">
+                    <label for="confirm-selection">I confirm my selection for this position</label>
+                </div>
+                
+                <button id="ballot-continue" class="btn btn-primary" disabled>Continue to Next Position</button>
+            </div>
+            
+            <!-- Review Screen -->
+            <div id="review-screen" class="auth-screen" style="display: none;">
+                <div class="auth-header">
+                    <h1>Review Your Selections</h1>
+                    <p>Confirm your votes before submitting</p>
+                </div>
+                
+                <div id="review-summary" class="review-summary">
+                    <!-- Review items will be generated here -->
+                </div>
+                
+                <div class="review-actions">
+                    <button id="edit-ballot" class="btn">Edit Selections</button>
+                    <button id="submit-vote" class="btn btn-success">Submit Your Vote</button>
+                </div>
+            </div>
+            
+            <!-- Confirmation Screen -->
+            <div id="confirmation-screen" class="auth-screen" style="display: none;">
+                <div class="auth-header">
+                    <div class="auth-logo success-logo">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h1>Vote Submitted Successfully!</h1>
+                    <p>Thank you for participating in the election</p>
+                </div>
+                
+                <div class="notification success">
+                    <i class="fas fa-check-circle"></i> Your vote has been recorded and submitted securely.
+                </div>
+                
+                <p style="text-align: center; margin: 25px 0;">
+                    You have completed the voting process. Your student ID has been marked as "Voted" in the system.
+                </p>
+                
+                <button id="return-to-auth" class="btn btn-primary">Return to Login</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="Assets/js/api.js"></script>
+    <script src="Assets/js/app.js"></script>
+    <script src="Assets/js/voter.js"></script>
+</body>
+</html>
