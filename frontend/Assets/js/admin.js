@@ -86,15 +86,22 @@ if (userInfo) {
 }
 document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('admin-module')) {
-        const db = evAPI.getDatabase();
-        if (db.system_status && !db.system_status.enabled) {
-            showAdminSystemDisabledMessage();
-            return;
-        }
+        // Check if using backend or localStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        const useBackend = urlParams.get('backend') === 'true';
 
-        // Create modals once when the page loads
-        createAdminModals();
-        loadAdminDashboard();
+        if (useBackend) {
+            // Initialize with backend integration
+            initAdminModuleBackend();
+        } else {
+            // Fallback to localStorage
+            const db = evAPI.getDatabase();
+            if (db.system_status && !db.system_status.enabled) {
+                showAdminSystemDisabledMessage();
+                return;
+            }
+            initAdminModule();
+        }
     }
 });
 
@@ -351,7 +358,7 @@ function createAdminModals() {
         document.getElementById('cancel-post-btn').addEventListener('click', closePostModal);
 
         // Handle form submission
-        document.getElementById('post-form').addEventListener('submit', (e) => {
+        document.getElementById('post-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const id = document.getElementById('post-id-input').value;
@@ -375,8 +382,28 @@ function createAdminModals() {
                 active: status === 'active'
             };
 
-            evAPI.savePost(postData);
-            loadPostsContent(document.getElementById('dashboard-content'));
+            // Check if backend mode
+            const urlParams = new URLSearchParams(window.location.search);
+            const useBackend = urlParams.get('backend') === 'true';
+
+            if (useBackend) {
+                try {
+                    if (id) {
+                        await apiClient.updatePost(id, postData);
+                    } else {
+                        await apiClient.createPost(postData);
+                    }
+                    await loadPostsContentBackend(document.getElementById('dashboard-content'));
+                } catch (error) {
+                    console.error('Error saving post:', error);
+                    alert('Failed to save post. Please try again.');
+                    return;
+                }
+            } else {
+                evAPI.savePost(postData);
+                loadPostsContent(document.getElementById('dashboard-content'));
+            }
+
             closePostModal();
             alert('Post saved successfully!');
         });
@@ -810,7 +837,7 @@ function closeSpecialPostModal() {
     document.body.classList.remove('modal-open');
 }
 
-function loadAdminDashboard() {
+function initAdminModule() {
     const adminUser = JSON.parse(sessionStorage.getItem('ev_admin_user'));
     if (!adminUser) {
         window.location.href = 'index.html';
@@ -861,8 +888,11 @@ function loadAdminDashboard() {
         }
     });
 
+    // Create modals once when the page loads
+    createAdminModals();
+
     // Load the dashboard by default
-    loadAdminSection('dashboard');
+    loadAdminDashboard();
 
     window.addEventListener('databaseUpdated', () => {
         const activeMenu = document.querySelector('.menu-item.active');
@@ -877,47 +907,130 @@ function loadAdminDashboard() {
     });
 }
 
-function loadAdminSection(section) {
-    const contentDiv = document.getElementById('dashboard-content');
-    
-    switch(section) {
-        case 'dashboard':
-            loadDashboardContent(contentDiv);
-            break;
-        case 'posts':
-            loadPostsContent(contentDiv);
-            break;
-        case 'candidates':
-            loadCandidatesContent(contentDiv);
-            break;
-        case 'guidelines':
-            loadGuidelinesContent(contentDiv);
-            break;
-        case 'voters':
-            loadVotersContent(contentDiv);
-            break;
-        case 'results':
-            loadResultsContent(contentDiv);
-            break;
-        case 'settings':
-            loadSettingsContent(contentDiv);
-            break;
-        case 'reset':
-            loadResetContent(contentDiv);
-            break;
+// Backend-integrated admin module
+async function initAdminModuleBackend() {
+    // State management
+    const state = {
+        currentSection: 'dashboard',
+        socket: null
+    };
+
+    // Check authentication
+    try {
+        const user = await apiClient.getCurrentUser();
+        if (!user) {
+            window.location.href = 'index.html';
+            return;
+        }
+    } catch (error) {
+        console.error('Authentication failed:', error);
+        window.location.href = 'index.html';
+        return;
+    }
+
+    // Theme toggle
+    const themeToggle = document.getElementById('admin-theme-toggle');
+    themeToggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    });
+
+    // Load saved theme
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+    }
+
+    // Menu navigation
+    const menuItems = document.querySelectorAll('.menu-item');
+
+    // For backend mode, assume full access (can be modified based on user roles from backend)
+    const allowedSections = ['dashboard', 'posts', 'candidates', 'guidelines', 'voters', 'results', 'settings', 'reset'];
+
+    menuItems.forEach(item => {
+        const target = item.getAttribute('data-target');
+        if (allowedSections.includes(target)) {
+            item.style.display = 'flex';
+            item.addEventListener('click', function() {
+                const target = this.getAttribute('data-target');
+
+                // Update active menu item
+                menuItems.forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+
+                // Load content for the section
+                state.currentSection = target;
+                loadAdminSectionBackend(target);
+                if (window.innerWidth <= 768) {
+                    document.querySelector('.sidebar').classList.remove('active');
+                }
+            });
+        } else {
+            item.style.display = 'none';
+        }
+    });
+
+    // Create modals once when the page loads
+    createAdminModals();
+
+    // Initialize Socket.io for real-time updates
+    initSocket();
+
+    // Load the dashboard by default
+    await loadAdminDashboardBackend();
+
+    document.getElementById('hamburger-menu').addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.toggle('active');
+    });
+
+    // Socket event listeners for real-time updates
+    function initSocket() {
+        apiClient.connectSocket();
+
+        // Listen for real-time updates
+        apiClient.onVoteUpdate((data) => {
+            console.log('Vote update received:', data);
+            // Refresh current section if needed
+            if (state.currentSection === 'dashboard' || state.currentSection === 'results') {
+                loadAdminSectionBackend(state.currentSection);
+            }
+        });
+
+        apiClient.onResultsUpdate((data) => {
+            console.log('Results update received:', data);
+            if (state.currentSection === 'results') {
+                loadAdminSectionBackend(state.currentSection);
+            }
+        });
+
+        apiClient.onSystemStatusChange((data) => {
+            console.log('System status change:', data);
+            if (!data.status) {
+                showAdminSystemDisabledMessage();
+            }
+        });
+
+        apiClient.onAdminNotification((data) => {
+            console.log('Admin notification:', data);
+            // Handle admin notifications (e.g., show toast)
+            if (typeof showGlobalToast === 'function') {
+                showGlobalToast(data.message, data.type || 'info');
+            }
+        });
     }
 }
 
-function loadDashboardContent(container) {
+function loadAdminDashboard() {
+    const contentDiv = document.getElementById('dashboard-content');
+
     const posts = evAPI.getPosts();
     const candidates = evAPI.getCandidates();
     const voters = evAPI.getVoters();
     const votes = evAPI.getVotes();
-    
+
     const votedCount = voters.filter(v => v.voted).length;
     const turnoutPercentage = voters.length > 0 ? Math.round((votedCount / voters.length) * 100) : 0;
-    
-    container.innerHTML = `
+
+    contentDiv.innerHTML = `
         <div class="dashboard-grid">
             <div class="card">
                 <div class="card-header">
@@ -929,7 +1042,7 @@ function loadDashboardContent(container) {
                 <div class="card-value">${voters.length}</div>
                 <div class="card-label">Total eligible voters</div>
             </div>
-            
+
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">Votes Cast</div>
@@ -940,7 +1053,7 @@ function loadDashboardContent(container) {
                 <div class="card-value">${votedCount}</div>
                 <div class="card-label">${turnoutPercentage}% Turnout</div>
             </div>
-            
+
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">Active Posts</div>
@@ -951,7 +1064,7 @@ function loadDashboardContent(container) {
                 <div class="card-value">${posts.filter(p => p.active).length}</div>
                 <div class="card-label">Positions for election</div>
             </div>
-            
+
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">Candidates</div>
@@ -963,7 +1076,7 @@ function loadDashboardContent(container) {
                 <div class="card-label">Total candidates</div>
             </div>
         </div>
-        
+
         <div class="card" style="margin-bottom: 30px;">
             <div class="card-header">
                 <div class="card-title">Cumulative Voting Activity</div>
@@ -972,7 +1085,7 @@ function loadDashboardContent(container) {
                 <canvas id="activityChart"></canvas>
             </div>
         </div>
-        
+
         <div class="card">
             <div class="card-header">
                 <div class="card-title">Recent Activity</div>
@@ -998,7 +1111,6 @@ function loadDashboardContent(container) {
         </div>
     `;
 
-    
     // Initialize chart
     const ctx = document.getElementById('activityChart').getContext('2d');
     const votesByHour = {};
@@ -1042,64 +1154,303 @@ function loadDashboardContent(container) {
     });
 }
 
-function loadPostsContent(container) {
-    const posts = evAPI.getPosts();
+function loadAdminSection(section) {
+    const contentDiv = document.getElementById('dashboard-content');
 
-    container.innerHTML = `
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">Manage Election Posts</div>
-                <div>
-                    <button class="btn btn-primary" id="add-post-btn">
-                        <i class="fas fa-plus"></i> Add New Post
-                    </button>
-                    <button class="btn btn-success" id="add-special-post-btn">
-                        <i class="fas fa-star"></i> Add Special Post
-                    </button>
-                    <button class="btn btn-danger" id="reset-posts-btn">
-                        <i class="fas fa-undo"></i> Reset All Posts
-                    </button>
+    switch(section) {
+        case 'dashboard':
+            loadDashboardContent(contentDiv);
+            break;
+        case 'posts':
+            loadPostsContent(contentDiv);
+            break;
+        case 'candidates':
+            loadCandidatesContent(contentDiv);
+            break;
+        case 'guidelines':
+            loadGuidelinesContent(contentDiv);
+            break;
+        case 'voters':
+            loadVotersContent(contentDiv);
+            break;
+        case 'results':
+            loadResultsContent(contentDiv);
+            break;
+        case 'settings':
+            loadSettingsContent(contentDiv);
+            break;
+        case 'reset':
+            loadResetContent(contentDiv);
+            break;
+    }
+}
+
+// Backend version of loadAdminSection
+async function loadAdminSectionBackend(section) {
+    const contentDiv = document.getElementById('dashboard-content');
+
+    switch(section) {
+        case 'dashboard':
+            await loadDashboardContentBackend(contentDiv);
+            break;
+        case 'posts':
+            await loadPostsContentBackend(contentDiv);
+            break;
+        case 'candidates':
+            await loadCandidatesContentBackend(contentDiv);
+            break;
+        case 'guidelines':
+            await loadGuidelinesContentBackend(contentDiv);
+            break;
+        case 'voters':
+            await loadVotersContentBackend(contentDiv);
+            break;
+        case 'results':
+            await loadResultsContentBackend(contentDiv);
+            break;
+        case 'settings':
+            loadSettingsContentBackend(contentDiv);
+            break;
+        case 'reset':
+            loadResetContentBackend(contentDiv);
+            break;
+    }
+}
+
+// Backend version of loadDashboardContent
+async function loadDashboardContentBackend(container) {
+    try {
+        const [postsResponse, candidatesResponse, votersResponse, votesResponse] = await Promise.all([
+            apiClient.getPosts(),
+            apiClient.getCandidates(),
+            apiClient.getAdminVoters(),
+            apiClient.getVotes()
+        ]);
+
+        const posts = postsResponse || [];
+        const candidates = candidatesResponse || [];
+        const voters = votersResponse || [];
+        const votes = votesResponse || [];
+
+        const votedCount = voters.filter(v => v.voted).length;
+        const turnoutPercentage = voters.length > 0 ? Math.round((votedCount / voters.length) * 100) : 0;
+
+        container.innerHTML = `
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Registered Voters</div>
+                        <div class="card-icon voters">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                    </div>
+                    <div class="card-value">${voters.length}</div>
+                    <div class="card-label">Total eligible voters</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Votes Cast</div>
+                        <div class="card-icon votes">
+                            <i class="fas fa-vote-yea"></i>
+                        </div>
+                    </div>
+                    <div class="card-value">${votedCount}</div>
+                    <div class="card-label">${turnoutPercentage}% Turnout</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Active Posts</div>
+                        <div class="card-icon posts">
+                            <i class="fas fa-list"></i>
+                        </div>
+                    </div>
+                    <div class="card-value">${posts.filter(p => p.active).length}</div>
+                    <div class="card-label">Positions for election</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Candidates</div>
+                        <div class="card-icon candidates">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="card-value">${candidates.length}</div>
+                    <div class="card-label">Total candidates</div>
                 </div>
             </div>
 
-            <div class="table-container">
+            <div class="card" style="margin-bottom: 30px;">
+                <div class="card-header">
+                    <div class="card-title">Cumulative Voting Activity</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Recent Activity</div>
+                </div>
                 <table>
                     <thead>
                         <tr>
-                            <th>Post Title</th>
-                            <th>Description</th>
-                            <th>Candidates</th>
-                            <th>Voting Order</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                            <th>Time</th>
+                            <th>Activity</th>
+                            <th>User</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${posts.map(post => {
-                            const candidateCount = evAPI.getCandidates().filter(c => c.postId === post.id).length;
-                            return `
-                                <tr>
-                                    <td>${post.title}</td>
-                                    <td>${post.description}</td>
-                                    <td>${candidateCount}</td>
-                                    <td>${post.order}</td>
-                                    <td><span class="status ${post.active ? 'active' : 'inactive'}">${post.active ? 'Active' : 'Inactive'}</span></td>
-                                    <td>
-                                        <button style="margin-bottom: 5px;" class="btn-icon edit-post" data-id="${post.id}">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn-icon delete-post" data-id="${post.id}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            `;
-                        }).join('')}
+                        ${votes.slice(-5).reverse().map(vote => `
+                            <tr>
+                                <td>${new Date(vote.timestamp).toLocaleTimeString()}</td>
+                                <td>Student ${vote.studentId} cast their vote</td>
+                                <td>Voter</td>
+                            </tr>
+                        `).join('')}
                     </tbody>
                 </table>
             </div>
-        </div>
-    `;
+        `;
+
+        // Initialize chart
+        const ctx = document.getElementById('activityChart').getContext('2d');
+        const votesByHour = {};
+        votes.forEach(vote => {
+            const hour = new Date(vote.timestamp).getHours();
+            votesByHour[hour] = (votesByHour[hour] || 0) + 1;
+        });
+
+        const chartLabels = [];
+        const chartData = [];
+        // Display hours from 8 AM to 5 PM
+        for (let i = 8; i <= 17; i++) {
+            chartLabels.push(`${i}:00`);
+            let cumulativeVotes = chartData.length > 0 ? chartData[chartData.length - 1] : 0;
+            cumulativeVotes += (votesByHour[i] || 0);
+            chartData.push(cumulativeVotes);
+        }
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Cumulative Votes Cast',
+                    data: chartData,
+                    borderColor: 'var(--primary)',
+                    backgroundColor: 'rgba(0, 82, 155, 0.7)',
+                    borderRadius: 5,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error loading dashboard:', error);
+        container.innerHTML = `
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Dashboard</div>
+                </div>
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Unable to load dashboard data. Please check your connection and try again.</p>
+                    <button onclick="loadAdminSectionBackend('dashboard')" class="btn btn-primary">Retry</button>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Backend version of loadPostsContent
+async function loadPostsContentBackend(container) {
+    try {
+        const posts = await apiClient.getPosts() || [];
+        const candidates = await apiClient.getCandidates() || [];
+
+        container.innerHTML = `
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Manage Election Posts</div>
+                    <div>
+                        <button class="btn btn-primary" id="add-post-btn">
+                            <i class="fas fa-plus"></i> Add New Post
+                        </button>
+                        <button class="btn btn-success" id="add-special-post-btn">
+                            <i class="fas fa-star"></i> Add Special Post
+                        </button>
+                        <button class="btn btn-danger" id="reset-posts-btn">
+                            <i class="fas fa-undo"></i> Reset All Posts
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Post Title</th>
+                                <th>Description</th>
+                                <th>Candidates</th>
+                                <th>Voting Order</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${posts.map(post => {
+                                const candidateCount = candidates.filter(c => c.postId === post.id).length;
+                                return `
+                                    <tr>
+                                        <td>${post.title}</td>
+                                        <td>${post.description}</td>
+                                        <td>${candidateCount}</td>
+                                        <td>${post.order}</td>
+                                        <td><span class="status ${post.active ? 'active' : 'inactive'}">${post.active ? 'Active' : 'Inactive'}</span></td>
+                                        <td>
+                                            <button style="margin-bottom: 5px;" class="btn-icon edit-post" data-id="${post.id}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn-icon delete-post" data-id="${post.id}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    } catch (error) {
+        console.error('Error loading posts:', error);
+        container.innerHTML = `
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Manage Election Posts</div>
+                </div>
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Unable to load posts data. Please check your connection and try again.</p>
+                    <button onclick="loadPostsContentBackend(document.getElementById('dashboard-content'))" class="btn btn-primary">Retry</button>
+                </div>
+            </div>
+        `;
+    }
+}
 
     // Create modal if it doesn't exist
     if (!document.getElementById('post-modal')) {
@@ -1204,7 +1555,7 @@ function loadPostsContent(container) {
     }
 
     // Add event listeners for elements that are recreated on each load
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', async function(e) {
         if (e.target && e.target.id === 'add-post-btn') {
             openPostModal();
         }
@@ -1212,15 +1563,30 @@ function loadPostsContent(container) {
             openSpecialPostModal();
         }
         if (e.target && e.target.id === 'reset-posts-btn') {
+            // Check if backend mode
+            const urlParams = new URLSearchParams(window.location.search);
+            const useBackend = urlParams.get('backend') === 'true';
+
             if (confirm('Are you sure you want to delete all posts? This will also delete all associated candidates and votes.')) {
                 if (prompt('To confirm, type "DELETE POSTS" in the box below.') === 'DELETE POSTS') {
-                    const db = evAPI.getDatabase();
-                    db.posts = [];
-                    db.candidates = [];
-                    db.votes = [];
-                    evAPI.saveDatabase(db);
-                    loadPostsContent(container);
-                    alert('All posts have been deleted.');
+                    if (useBackend) {
+                        try {
+                            await apiClient.resetSystem();
+                            await loadPostsContentBackend(container);
+                            alert('All posts have been deleted.');
+                        } catch (error) {
+                            console.error('Error resetting system:', error);
+                            alert('Failed to reset system. Please try again.');
+                        }
+                    } else {
+                        const db = evAPI.getDatabase();
+                        db.posts = [];
+                        db.candidates = [];
+                        db.votes = [];
+                        evAPI.saveDatabase(db);
+                        loadPostsContent(container);
+                        alert('All posts have been deleted.');
+                    }
                 } else {
                     alert('Action cancelled.');
                 }
@@ -1228,24 +1594,68 @@ function loadPostsContent(container) {
         }
         if (e.target && e.target.classList.contains('edit-post')) {
             const postId = e.target.dataset.id;
-            const post = evAPI.getPost(postId);
+
+            // Check if backend mode
+            const urlParams = new URLSearchParams(window.location.search);
+            const useBackend = urlParams.get('backend') === 'true';
+
+            let post = null;
+            if (useBackend) {
+                try {
+                    post = await apiClient.getPost(postId);
+                } catch (error) {
+                    console.error('Error fetching post:', error);
+                }
+            } else {
+                post = evAPI.getPost(postId);
+            }
+
             if (post) {
                 openPostModal(post);
             }
         }
         if (e.target && e.target.classList.contains('delete-post')) {
             const postId = e.target.dataset.id;
-            if (confirm(`Are you sure you want to delete the post "${evAPI.getPost(postId).title}"?`)) {
-                evAPI.deletePost(postId);
 
-                // Renumber all remaining posts to ensure continuous sequential ordering
-                renumberPosts();
+            // Check if backend mode
+            const urlParams = new URLSearchParams(window.location.search);
+            const useBackend = urlParams.get('backend') === 'true';
 
-                loadPostsContent(container);
+            let postTitle = '';
+            if (useBackend) {
+                // For backend mode, we need to get the post title differently
+                // Since we don't have a direct getPost method, we'll use the posts list
+                try {
+                    const posts = await apiClient.getPosts();
+                    const post = posts.find(p => p.id === postId);
+                    postTitle = post ? post.title : 'Unknown Post';
+                } catch (error) {
+                    console.error('Error fetching post:', error);
+                    postTitle = 'Unknown Post';
+                }
+            } else {
+                postTitle = evAPI.getPost(postId).title;
+            }
+
+            if (confirm(`Are you sure you want to delete the post "${postTitle}"?`)) {
+                if (useBackend) {
+                    try {
+                        await apiClient.deletePost(postId);
+                        await loadPostsContentBackend(container);
+                    } catch (error) {
+                        console.error('Error deleting post:', error);
+                        alert('Failed to delete post. Please try again.');
+                    }
+                } else {
+                    evAPI.deletePost(postId);
+                    // Renumber all remaining posts to ensure continuous sequential ordering
+                    renumberPosts();
+                    loadPostsContent(container);
+                }
             }
         }
     });
-}
+
 
 function loadCandidatesContent(container) {
     const posts = evAPI.getPosts();
@@ -2237,6 +2647,360 @@ function exportResults() {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
+}
+
+// Backend version of loadSettingsContent
+function loadSettingsContentBackend(container) {
+    container.innerHTML = `
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">System Settings</div>
+            </div>
+            <div class="settings-content">
+                <div class="setting-group">
+                    <h3>System Configuration</h3>
+                    <div class="setting-item">
+                        <label for="system-status-toggle">System Status</label>
+                        <div class="toggle-container">
+                            <input type="checkbox" id="system-status-toggle" checked>
+                            <label for="system-status-toggle" class="toggle-slider"></label>
+                            <span class="toggle-text">Voting System Active</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="maintenance-mode-toggle">Maintenance Mode</label>
+                        <div class="toggle-container">
+                            <input type="checkbox" id="maintenance-mode-toggle">
+                            <label for="maintenance-mode-toggle" class="toggle-slider"></label>
+                            <span class="toggle-text">Maintenance Mode Off</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <h3>Real-time Updates</h3>
+                    <div class="setting-item">
+                        <label for="socket-enabled-toggle">Socket.io Connection</label>
+                        <div class="toggle-container">
+                            <input type="checkbox" id="socket-enabled-toggle" checked>
+                            <label for="socket-enabled-toggle" class="toggle-slider"></label>
+                            <span class="toggle-text">Real-time Updates Enabled</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <h3>Data Management</h3>
+                    <button class="btn btn-warning" id="clear-cache-btn">
+                        <i class="fas fa-broom"></i> Clear System Cache
+                    </button>
+                    <button class="btn btn-info" id="export-system-data-btn">
+                        <i class="fas fa-download"></i> Export System Data
+                    </button>
+                </div>
+
+                <div class="setting-group">
+                    <h3>System Information</h3>
+                    <div class="info-item">
+                        <strong>Version:</strong> <span id="system-version">2.0.0</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Last Updated:</strong> <span id="last-updated">${new Date().toLocaleString()}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Database:</strong> <span id="db-status">Connected</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <style>
+        .settings-content {
+            padding: 20px;
+        }
+        .setting-group {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        .setting-group h3 {
+            margin: 0 0 15px 0;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toggle-slider {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            background-color: #ccc;
+            border-radius: 24px;
+            transition: 0.4s;
+            cursor: pointer;
+        }
+        .toggle-slider:before {
+            content: "";
+            position: absolute;
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            border-radius: 50%;
+            transition: 0.4s;
+        }
+        input[type="checkbox"]:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+        input[type="checkbox"]:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        .toggle-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .info-item {
+            padding: 8px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        </style>
+    `;
+
+    // Add event listeners for settings
+    document.getElementById('system-status-toggle').addEventListener('change', async (e) => {
+        try {
+            await apiClient.updateSystemStatus({ enabled: e.target.checked });
+            const toggleText = e.target.parentElement.querySelector('.toggle-text');
+            toggleText.textContent = e.target.checked ? 'Voting System Active' : 'Voting System Disabled';
+            if (typeof showGlobalToast === 'function') {
+                showGlobalToast(`System ${e.target.checked ? 'enabled' : 'disabled'} successfully`, 'success');
+            }
+        } catch (error) {
+            console.error('Error updating system status:', error);
+            e.target.checked = !e.target.checked; // Revert on error
+            if (typeof showGlobalToast === 'function') {
+                showGlobalToast('Failed to update system status', 'error');
+            }
+        }
+    });
+
+    document.getElementById('maintenance-mode-toggle').addEventListener('change', async (e) => {
+        try {
+            await apiClient.updateSystemSettings({ maintenanceMode: e.target.checked });
+            const toggleText = e.target.parentElement.querySelector('.toggle-text');
+            toggleText.textContent = e.target.checked ? 'Maintenance Mode On' : 'Maintenance Mode Off';
+            if (typeof showGlobalToast === 'function') {
+                showGlobalToast(`Maintenance mode ${e.target.checked ? 'enabled' : 'disabled'}`, 'info');
+            }
+        } catch (error) {
+            console.error('Error updating maintenance mode:', error);
+            e.target.checked = !e.target.checked; // Revert on error
+            if (typeof showGlobalToast === 'function') {
+                showGlobalToast('Failed to update maintenance mode', 'error');
+            }
+        }
+    });
+
+    document.getElementById('clear-cache-btn').addEventListener('click', async () => {
+        if (confirm('Are you sure you want to clear the system cache? This will refresh all cached data.')) {
+            try {
+                await apiClient.clearCache();
+                if (typeof showGlobalToast === 'function') {
+                    showGlobalToast('System cache cleared successfully', 'success');
+                }
+            } catch (error) {
+                console.error('Error clearing cache:', error);
+                if (typeof showGlobalToast === 'function') {
+                    showGlobalToast('Failed to clear cache', 'error');
+                }
+            }
+        }
+    });
+
+    document.getElementById('export-system-data-btn').addEventListener('click', async () => {
+        try {
+            const systemData = await apiClient.exportSystemData();
+            const blob = new Blob([JSON.stringify(systemData, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `system_backup_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            if (typeof showGlobalToast === 'function') {
+                showGlobalToast('System data exported successfully', 'success');
+            }
+        } catch (error) {
+            console.error('Error exporting system data:', error);
+            if (typeof showGlobalToast === 'function') {
+                showGlobalToast('Failed to export system data', 'error');
+            }
+        }
+    });
+}
+
+// Backend version of loadResetContent
+async function loadResetContentBackend(container) {
+    try {
+        const systemStatus = await apiClient.getSystemStatus() || { enabled: true };
+
+        container.innerHTML = `
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Admin Data Reset</div>
+                </div>
+                <p style="margin-bottom: 20px;">These actions will clear specific sets of data. This cannot be undone.</p>
+
+                <div class="setting-group">
+                    <h3>Vote Management</h3>
+                    <div class="form-group">
+                        <label>Clear All Votes</label>
+                        <p>This will reset the vote count for all candidates to zero, but will not affect voter "voted" status.</p>
+                        <button class="btn btn-danger" id="reset-votes-btn" style="margin-top: 20px;">
+                            <i class="fas fa-undo"></i> Clear All Votes
+                        </button>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <h3>Voter Status Management</h3>
+                    <div class="form-group">
+                        <label>Reset All Voter Statuses</label>
+                        <p>This will mark all voters as "not voted", allowing them to vote again. This does not clear cast votes.</p>
+                        <button class="btn btn-danger" id="reset-voters-btn" style="margin-top: 20px;">
+                            <i class="fas fa-refresh"></i> Reset Voter Statuses
+                        </button>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <h3>System Reset</h3>
+                    <div class="form-group">
+                        <label>Complete System Reset</label>
+                        <p>This will clear ALL data including posts, candidates, votes, and voter statuses. Use with extreme caution.</p>
+                        <button class="btn btn-danger" id="reset-system-btn" style="margin-top: 20px;">
+                            <i class="fas fa-exclamation-triangle"></i> Complete System Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <style>
+            .setting-group {
+                margin-bottom: 30px;
+                padding: 20px;
+                background: var(--card-bg);
+                border-radius: 8px;
+                border: 1px solid var(--border-color);
+            }
+            .setting-group h3 {
+                margin: 0 0 15px 0;
+                color: var(--primary);
+                font-size: 1.2rem;
+            }
+            </style>
+        `;
+
+        document.getElementById('reset-votes-btn').addEventListener('click', async () => {
+            const password = prompt('Enter your password to confirm clearing all votes:');
+            if (password === 'admin123') {
+                if (confirm('Are you sure you want to clear all votes? This action cannot be undone.')) {
+                    try {
+                        await apiClient.resetVotes();
+                        if (typeof showGlobalToast === 'function') {
+                            showGlobalToast('All votes have been cleared successfully', 'success');
+                        }
+                    } catch (error) {
+                        console.error('Error resetting votes:', error);
+                        if (typeof showGlobalToast === 'function') {
+                            showGlobalToast('Failed to reset votes', 'error');
+                        }
+                    }
+                }
+            } else {
+                alert('Incorrect password.');
+            }
+        });
+
+        document.getElementById('reset-voters-btn').addEventListener('click', async () => {
+            const password = prompt('Enter your password to confirm resetting all voter statuses:');
+            if (password === 'admin123') {
+                if (confirm('Are you sure you want to reset all voter statuses? This will allow everyone to vote again.')) {
+                    try {
+                        await apiClient.resetVoterStatuses();
+                        if (typeof showGlobalToast === 'function') {
+                            showGlobalToast('All voter statuses have been reset successfully', 'success');
+                        }
+                    } catch (error) {
+                        console.error('Error resetting voter statuses:', error);
+                        if (typeof showGlobalToast === 'function') {
+                            showGlobalToast('Failed to reset voter statuses', 'error');
+                        }
+                    }
+                }
+            } else {
+                alert('Incorrect password.');
+            }
+        });
+
+        document.getElementById('reset-system-btn').addEventListener('click', async () => {
+            const password = prompt('Enter your password to confirm complete system reset:');
+            if (password === 'admin123') {
+                if (confirm('⚠️ WARNING: This will delete ALL data. Are you absolutely sure?') &&
+                    prompt('To confirm, type "RESET ALL DATA" in the box below.') === 'RESET ALL DATA') {
+                    try {
+                        await apiClient.resetSystem();
+                        if (typeof showGlobalToast === 'function') {
+                            showGlobalToast('Complete system reset completed successfully', 'success');
+                        }
+                        // Reload the page to reflect the reset
+                        setTimeout(() => window.location.reload(), 2000);
+                    } catch (error) {
+                        console.error('Error resetting system:', error);
+                        if (typeof showGlobalToast === 'function') {
+                            showGlobalToast('Failed to reset system', 'error');
+                        }
+                    }
+                } else {
+                    alert('Action cancelled.');
+                }
+            } else {
+                alert('Incorrect password.');
+            }
+        });
+    } catch (error) {
+        console.error('Error loading reset content:', error);
+        container.innerHTML = `
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Admin Data Reset</div>
+                </div>
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Unable to load reset options. Please check your connection and try again.</p>
+                    <button onclick="loadResetContentBackend(document.getElementById('dashboard-content'))" class="btn btn-primary">Retry</button>
+                </div>
+            </div>
+        `;
+    }
 }
 
 function loadSettingsContent(container) {
