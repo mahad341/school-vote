@@ -69,7 +69,7 @@ __decorate([
     __metadata("design:type", String)
 ], Vote.prototype, "verificationHash", void 0);
 __decorate([
-    Column({ type: 'jsonb', nullable: true }),
+    Column({ type: 'json', nullable: true }),
     __metadata("design:type", Object)
 ], Vote.prototype, "metadata", void 0);
 __decorate([

@@ -4,14 +4,22 @@ let redisClient: RedisClientType;
 
 export const connectRedis = async (): Promise<void> => {
   try {
-    redisClient = createClient({
-      password: process.env.REDIS_PASSWORD || undefined,
-      socket: {
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379'),
-        connectTimeout: 60000,
-      },
-    });
+    // Use REDIS_URL if available (Render provides this), otherwise fallback to individual config
+    const redisUrl = process.env.REDIS_URL;
+    if (redisUrl) {
+      redisClient = createClient({
+        url: redisUrl,
+      });
+    } else {
+      redisClient = createClient({
+        password: process.env.REDIS_PASSWORD || undefined,
+        socket: {
+          host: process.env.REDIS_HOST || 'localhost',
+          port: parseInt(process.env.REDIS_PORT || '6379'),
+          connectTimeout: 60000,
+        },
+      });
+    }
 
     redisClient.on('error', (err) => {
       console.error('❌ Redis Client Error:', err);

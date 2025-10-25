@@ -32,7 +32,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGIN
-        value: https://your-netlify-site.netlify.app
+        value: https://school-evote.netlify.app
       - key: REDIS_URL
         fromService:
           type: redis

@@ -47,23 +47,23 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "id", void 0);
 __decorate([
-    Column({ unique: true, length: 20 }),
+    Column({ type: 'varchar', unique: true, length: 20 }),
     __metadata("design:type", String)
 ], User.prototype, "studentId", void 0);
 __decorate([
-    Column({ length: 100 }),
+    Column({ type: 'varchar', length: 100 }),
     __metadata("design:type", String)
 ], User.prototype, "firstName", void 0);
 __decorate([
-    Column({ length: 100 }),
+    Column({ type: 'varchar', length: 100 }),
     __metadata("design:type", String)
 ], User.prototype, "lastName", void 0);
 __decorate([
-    Column({ unique: true, length: 255 }),
+    Column({ type: 'varchar', unique: true, length: 255 }),
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
 __decorate([
-    Column({ length: 255 }),
+    Column({ type: 'varchar', length: 255 }),
     __metadata("design:type", String)
 ], User.prototype, "password", void 0);
 __decorate([
@@ -83,15 +83,15 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "status", void 0);
 __decorate([
-    Column({ nullable: true, length: 50 }),
+    Column({ type: 'varchar', nullable: true, length: 50 }),
     __metadata("design:type", String)
 ], User.prototype, "house", void 0);
 __decorate([
-    Column({ nullable: true, length: 20 }),
+    Column({ type: 'varchar', nullable: true, length: 20 }),
     __metadata("design:type", String)
 ], User.prototype, "class", void 0);
 __decorate([
-    Column({ default: false }),
+    Column({ type: 'boolean', default: false }),
     __metadata("design:type", Boolean)
 ], User.prototype, "hasVoted", void 0);
 __decorate([
