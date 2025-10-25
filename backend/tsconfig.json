@@ -8,13 +8,13 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node", "jest"],
+    "types": ["node"],
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "allowSyntheticDefaultImports": true,
-    "declaration": false  
+    "declaration": false
   },
-  "include": ["src/**/*.ts", "src/tests/**/*.ts"],
-  "exclude": ["node_modules", "dist", "tests", "**/*.test.ts"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts", "src/tests/**/*"]
 }
