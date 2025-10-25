@@ -9,7 +9,7 @@ services:
       - key: NODE_ENV
         value: development
       - key: PORT
-        generateValue: true
+        value: 3000
       - key: DB_HOST
         fromDatabase:
           name: e-voting-db
