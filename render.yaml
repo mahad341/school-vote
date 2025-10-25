@@ -50,4 +50,4 @@ databases:
   - name: e-voting-db
     databaseName: e_voting_db
     user: e_voting_user
-    plan: starter-plus # ✅ updated from deprecated 'starter'
+    plan: free
