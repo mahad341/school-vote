@@ -8,17 +8,28 @@ import { authLimiter, createAccountLimiter } from '../middleware/rateLimit.js';
 const router = Router();
 // Input validation middleware
 const loginValidation = [
-    body('studentId')
-        .trim()
-        .notEmpty()
-        .withMessage('Student ID is required')
-        .isLength({ min: 3, max: 20 })
-        .withMessage('Student ID must be between 3 and 20 characters'),
     body('password')
         .notEmpty()
         .withMessage('Password is required')
         .isLength({ min: 6 })
         .withMessage('Password must be at least 6 characters long'),
+    body()
+        .custom((value, { req }) => {
+        if (!req.body.studentId && !req.body.username) {
+            throw new Error('Either studentId or username is required');
+        }
+        return true;
+    }),
+    body('studentId')
+        .optional()
+        .trim()
+        .isLength({ min: 3, max: 20 })
+        .withMessage('Student ID must be between 3 and 20 characters'),
+    body('username')
+        .optional()
+        .trim()
+        .isLength({ min: 3, max: 50 })
+        .withMessage('Username must be between 3 and 50 characters'),
 ];
 const registerValidation = [
     body('studentId')

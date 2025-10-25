@@ -86,22 +86,8 @@ if (userInfo) {
 }
 document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('admin-module')) {
-        // Check if using backend or localStorage
-        const urlParams = new URLSearchParams(window.location.search);
-        const useBackend = urlParams.get('backend') === 'true';
-
-        if (useBackend) {
-            // Initialize with backend integration
-            initAdminModuleBackend();
-        } else {
-            // Fallback to localStorage
-            const db = evAPI.getDatabase();
-            if (db.system_status && !db.system_status.enabled) {
-                showAdminSystemDisabledMessage();
-                return;
-            }
-            initAdminModule();
-        }
+        // Initialize with backend integration
+        initAdminModuleBackend();
     }
 });
 

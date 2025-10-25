@@ -5,7 +5,8 @@ import { AppDataSource } from '../config/database.js';
 import { AuditLog, AuditAction, AuditSeverity } from '../models/AuditLog.js';
 
 export interface LoginCredentials {
-  studentId: string;
+  studentId?: string;
+  username?: string;
   password: string;
 }
 
@@ -35,13 +36,21 @@ export class AuthService {
    * Authenticate user with credentials
    */
   static async login(credentials: LoginCredentials, ipAddress?: string, userAgent?: string): Promise<AuthResult> {
-    const { studentId, password } = credentials;
+    const { studentId, username, password } = credentials;
 
-    // Find user by student ID
+    // Find user by student ID or username
     const userRepository = AppDataSource.getRepository(User);
-    const user = await userRepository.findOne({
-      where: { studentId, status: UserStatus.ACTIVE }
-    });
+    let user: User | null = null;
+
+    if (studentId) {
+      user = await userRepository.findOne({
+        where: { studentId, status: UserStatus.ACTIVE }
+      });
+    } else if (username) {
+      user = await userRepository.findOne({
+        where: { email: username, status: UserStatus.ACTIVE }
+      });
+    }
 
     if (!user) {
       // Log failed login attempt

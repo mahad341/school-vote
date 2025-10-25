@@ -219,28 +219,29 @@ class ApiClient {
 
     // Voter-specific endpoints
     async getVoterProfile() {
-        return this.request('/voter/profile');
+        return this.request('/auth/me');
     }
 
     async getVoterPosts() {
-        return this.request('/voter/posts');
+        return this.request('/posts?status=active');
     }
 
     async getVoterCandidates(postId) {
-        return this.request(`/voter/candidates/${postId}`);
+        return this.request(`/candidates?postId=${postId}&status=active`);
     }
 
     async getVotingGuidelines() {
-        return this.request('/voter/guidelines');
+        // Guidelines are now static content, but could be fetched from backend
+        return '<h2>School Election Guidelines</h2><p>Please read these guidelines carefully before casting your vote:</p><ol><li>Each student is entitled to one vote per position.</li><li>Votes are confidential and cannot be traced back to individual students.</li><li>Once you submit your vote, you cannot change your selections.</li><li>You must vote for one candidate in each category to complete the process.</li><li>Do not share your student ID with anyone during the voting process.</li><li>The voting system will automatically log you out after 15 minutes of inactivity.</li><li>Any attempt to manipulate the voting system will result in disciplinary action.</li></ol>';
     }
 
     // Admin endpoints
     async getAdminResults() {
-        return this.request('/admin/results');
+        return this.request('/posts?includeCandidates=true');
     }
 
     async getAdminVoters() {
-        return this.request('/admin/voters');
+        return this.request('/ict-admin/users');
     }
 
     // ICT Admin endpoints
@@ -268,21 +269,23 @@ class ApiClient {
     }
 
     async createBackup() {
-        return this.request('/ict-admin/system/backup', {
-            method: 'POST'
+        return this.request('/backups', {
+            method: 'POST',
+            body: JSON.stringify({ type: 'manual', description: 'Manual backup from frontend' })
         });
     }
 
     async restoreBackup(backupId) {
-        return this.request(`/ict-admin/system/restore/${backupId}`, {
-            method: 'POST'
+        return this.request(`/backups/${backupId}/restore`, {
+            method: 'POST',
+            body: JSON.stringify({ confirmation: 'RESTORE_BACKUP' })
         });
     }
 
     async resetVotes() {
-        return this.request('/ict-admin/reset-votes', {
+        return this.request('/ict-admin/system/reset-votes', {
             method: 'POST',
-            body: JSON.stringify({ confirmation: 'RESET_VOTES' })
+            body: JSON.stringify({ confirmation: 'RESET_ALL_VOTES' })
         });
     }
 
@@ -312,6 +315,26 @@ class ApiClient {
 
     async getPerformanceMetrics() {
         return this.request('/ict-admin/performance-metrics');
+    }
+
+    // Additional helper methods for real-time synchronization
+    async getLiveResults(postId) {
+        return this.request(`/realtime/results/${postId}`);
+    }
+
+    async getVotingStatus() {
+        return this.request('/realtime/voting-status');
+    }
+
+    async getAllLiveResults() {
+        return this.request('/realtime/all-results');
+    }
+
+    async broadcastResults(postId, message) {
+        return this.request('/realtime/broadcast-results', {
+            method: 'POST',
+            body: JSON.stringify({ postId, message })
+        });
     }
 
     // Socket.io Integration

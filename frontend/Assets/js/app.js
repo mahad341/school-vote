@@ -1,274 +1,397 @@
 // =============================================
-// Legacy Database Simulation (Maintained for compatibility)
+// Backend API Integration
 // =============================================
 
-// Initialize the database if it doesn't exist (for backward compatibility)
-function initDatabase() {
-    if (!localStorage.getItem('ev_database')) {
-        const database = {
-            posts: [
-                {
-                    id: 'president',
-                    title: 'School President',
-                    description: 'Head of the student council',
-                    order: 1,
-                    active: true
-                },
-                {
-                    id: 'vice-president',
-                    title: 'Vice President',
-                    description: 'Assists the president',
-                    order: 2,
-                    active: true
-                },
-                {
-                    id: 'secretary',
-                    title: 'General Secretary',
-                    description: 'Manages council records',
-                    order: 3,
-                    active: true
-                },
-                {
-                    id: 'treasurer',
-                    title: 'Treasurer',
-                    description: 'Manages student funds',
-                    order: 4,
-                    active: true
-                },
-                {
-                    id: 'sports-prefect',
-                    title: 'Sports Prefect',
-                    description: 'Leads the sports department',
-                    order: 5,
-                    active: true
-                },
-                {
-                    id: 'entertainment-prefect',
-                    title: 'Entertainment Prefect',
-                    description: 'Manages entertainment and events',
-                    order: 6,
-                    active: false
-                }
-            ],
-            candidates: [
-                {
-                    id: 'c1',
-                    name: 'Alice A. Thompson',
-                    class: 'S6A',
-                    stream: 'Science',
-                    slogan: 'Leading with innovation and integrity',
-                    photoUrl: '',
-                    postId: 'president',
-                    votes: 0
-                },
-                {
-                    id: 'c2',
-                    name: 'David B. Roberts',
-                    class: 'S6B',
-                    stream: 'Arts',
-                    slogan: 'Your voice, our future',
-                    photoUrl: '',
-                    postId: 'president',
-                    votes: 0
-                },
-                {
-                    id: 'c3',
-                    name: 'James D. Carter',
-                    class: 'S5A',
-                    stream: 'Science',
-                    slogan: 'Together we achieve more',
-                    photoUrl: '',
-                    postId: 'vice-president',
-                    votes: 0
-                },
-                {
-                    id: 'c4',
-                    name: 'Sophia E. Martinez',
-                    class: 'S5B',
-                    stream: 'Arts',
-                    slogan: 'Empowering student voices',
-                    photoUrl: '',
-                    postId: 'vice-president',
-                    votes: 0
-                }
-            ],
-            voters: [
-                { id: 'S12345', name: 'John K. Anderson', className: 'S6', house: 'Lion House', voted: false },
-                { id: 'S23456', name: 'Sarah M. Johnson', className: 'S5', house: 'Eagle House', voted: false },
-                { id: 'S34567', name: 'Michael T. Williams', className: 'S4', house: 'Panther House', voted: false }
-            ],
-            votes: [],
-            guidelines: '<h2>School Election Guidelines</h2><p>Please read these guidelines carefully before casting your vote:</p><ol><li>Each student is entitled to one vote per position.</li><li>Votes are confidential and cannot be traced back to individual students.</li><li>Once you submit your vote, you cannot change your selections.</li><li>You must vote for one candidate in each category to complete the process.</li><li>Do not share your student ID with anyone during the voting process.</li><li>The voting system will automatically log you out after 15 minutes of inactivity.</li><li>Any attempt to manipulate the voting system will result in disciplinary action.</li></ol>',
-            system_status: {
-                enabled: true,
-                history: [
-                    { timestamp: new Date().toISOString(), action: 'System Initialized', user: 'ICT Admin' }
-                ]
-            },
-            admins: [
-                { id: 'admin1', username: 'admin', password: 'admin123', role: 'Super Administrator', status: 'Active' },
-                { id: 'ictadmin1', username: 'ictadmin', password: 'ictadmin123', role: 'ICT Administrator', status: 'Active' }
-            ],
-            audit_log: []
-        };
-        localStorage.setItem('ev_database', JSON.stringify(database));
-    }
-    return JSON.parse(localStorage.getItem('ev_database'));
-}
+// API Client for backend communication
+const apiClient = {
+    baseURL: 'http://localhost:3001/api',
 
-// Legacy API functions (maintained for backward compatibility)
-const evAPI = {
-    // Get all data
-    getDatabase: () => {
-        return JSON.parse(localStorage.getItem('ev_database') || '{}');
-    },
-
-    // Save the entire database
-    saveDatabase: (db) => {
-        localStorage.setItem('ev_database', JSON.stringify(db));
-    },
-
-    // Posts
-    getPosts: () => {
-        const db = evAPI.getDatabase();
-        return db.posts || [];
-    },
-
-    getPost: (id) => {
-        const db = evAPI.getDatabase();
-        return db.posts.find(post => post.id === id);
-    },
-
-    savePost: (post) => {
-        const db = evAPI.getDatabase();
-        const index = db.posts.findIndex(p => p.id === post.id);
-        if (index !== -1) {
-            // Update existing post
-            db.posts[index] = post;
-        } else {
-            // Add new post
-            db.posts.push(post);
-        }
-        evAPI.saveDatabase(db);
-        return post;
-    },
-
-    deletePost: (id) => {
-        const db = evAPI.getDatabase();
-        db.posts = db.posts.filter(post => post.id !== id);
-        evAPI.saveDatabase(db);
-        return true;
-    },
-
-    // Candidates
-    getCandidates: () => {
-        const db = evAPI.getDatabase();
-        return db.candidates || [];
-    },
-
-    getCandidate: (id) => {
-        const db = evAPI.getDatabase();
-        return db.candidates.find(candidate => candidate.id === id);
-    },
-
-    saveCandidate: (candidate) => {
-        const db = evAPI.getDatabase();
-        const index = db.candidates.findIndex(c => c.id === candidate.id);
-        if (index !== -1) {
-            // Update existing candidate
-            db.candidates[index] = candidate;
-        } else {
-            // Add new candidate
-            db.candidates.push(candidate);
-        }
-        evAPI.saveDatabase(db);
-        return candidate;
-    },
-
-    deleteCandidate: (id) => {
-        const db = evAPI.getDatabase();
-        db.candidates = db.candidates.filter(candidate => candidate.id !== id);
-        evAPI.saveDatabase(db);
-        return true;
-    },
-
-    // Voters
-    getVoters: () => {
-        const db = evAPI.getDatabase();
-        return db.voters || [];
-    },
-
-    getVoter: (id) => {
-        const db = evAPI.getDatabase();
-        return db.voters.find(voter => voter.id === id);
-    },
-
-    saveVoter: (voter) => {
-        const db = evAPI.getDatabase();
-        const index = db.voters.findIndex(v => v.id === voter.id);
-        if (index !== -1) {
-            // Update existing voter
-            db.voters[index] = voter;
-        } else {
-            // Add new voter
-            db.voters.push(voter);
-        }
-        evAPI.saveDatabase(db);
-        return voter;
-    },
-
-    // Votes
-    getVotes: () => {
-        const db = evAPI.getDatabase();
-        return db.votes || [];
-    },
-
-    saveVote: (vote) => {
-        const db = evAPI.getDatabase();
-        db.votes.push(vote);
-
-        // Update candidate vote counts
-        vote.selections.forEach(selection => {
-            const candidate = db.candidates.find(c => c.id === selection.candidateId);
-            if (candidate) {
-                candidate.votes = (candidate.votes || 0) + 1;
-            }
+    // Authentication methods
+    async login(credentials) {
+        const response = await fetch(`${this.baseURL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(credentials)
         });
-
-        // Mark voter as voted
-        const voter = db.voters.find(v => v.id === vote.studentId);
-        if (voter) {
-            voter.voted = true;
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        if (data.token) {
+            this.setToken(data.token);
+            if (data.refreshToken) this.setRefreshToken(data.refreshToken);
         }
-
-        evAPI.saveDatabase(db);
-
-        // Dispatch a custom event to notify other modules of the update
-        window.dispatchEvent(new CustomEvent('databaseUpdated'));
-
-        return vote;
+        return data;
     },
 
-    // Guidelines
-    getGuidelines: () => {
-        const db = evAPI.getDatabase();
-        return db.guidelines || '';
+    async register(userData) {
+        const response = await fetch(`${this.baseURL}/auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getToken()}`
+            },
+            body: JSON.stringify(userData)
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data;
     },
 
-    saveGuidelines: (content) => {
-        const db = evAPI.getDatabase();
-        db.guidelines = content;
-        evAPI.saveDatabase(db);
-        return content;
+    async logout() {
+        const response = await fetch(`${this.baseURL}/auth/logout`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${this.getToken()}` }
+        });
+        this.clearTokens();
+        return response.ok;
+    },
+
+    async refreshToken() {
+        const refreshToken = this.getRefreshToken();
+        if (!refreshToken) throw new Error('No refresh token available');
+
+        const response = await fetch(`${this.baseURL}/auth/refresh-token`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+
+        this.setToken(data.tokens.accessToken);
+        this.setRefreshToken(data.tokens.refreshToken);
+        return data;
+    },
+
+    async getCurrentUser() {
+        const response = await fetch(`${this.baseURL}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${this.getToken()}` }
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    // Posts methods
+    async getPosts(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        const response = await fetch(`${this.baseURL}/posts?${query}`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    async getPost(id) {
+        const response = await fetch(`${this.baseURL}/posts/${id}`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    async createPost(postData) {
+        const response = await fetch(`${this.baseURL}/posts`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getToken()}`
+            },
+            body: JSON.stringify(postData)
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    async updatePost(id, postData) {
+        const response = await fetch(`${this.baseURL}/posts/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getToken()}`
+            },
+            body: JSON.stringify(postData)
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    async deletePost(id) {
+        const response = await fetch(`${this.baseURL}/posts/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${this.getToken()}` }
+        });
+        if (!response.ok) throw new Error('Failed to delete post');
+        return true;
+    },
+
+    // Candidates methods
+    async getCandidates(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        const response = await fetch(`${this.baseURL}/candidates?${query}`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    async getCandidate(id) {
+        const response = await fetch(`${this.baseURL}/candidates/${id}`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    async createCandidate(candidateData) {
+        const response = await fetch(`${this.baseURL}/candidates`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getToken()}`
+            },
+            body: JSON.stringify(candidateData)
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    async updateCandidate(id, candidateData) {
+        const response = await fetch(`${this.baseURL}/candidates/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getToken()}`
+            },
+            body: JSON.stringify(candidateData)
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    async deleteCandidate(id) {
+        const response = await fetch(`${this.baseURL}/candidates/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${this.getToken()}` }
+        });
+        if (!response.ok) throw new Error('Failed to delete candidate');
+        return true;
+    },
+
+    // Votes methods
+    async castVote(voteData) {
+        const response = await fetch(`${this.baseURL}/votes`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getToken()}`
+            },
+            body: JSON.stringify(voteData)
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    async getMyVotes() {
+        const response = await fetch(`${this.baseURL}/votes/my-votes`, {
+            headers: { 'Authorization': `Bearer ${this.getToken()}` }
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    async getVotes(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        const response = await fetch(`${this.baseURL}/votes/stats?${query}`, {
+            headers: { 'Authorization': `Bearer ${this.getToken()}` }
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    // Admin methods
+    async getAdminVoters(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        const response = await fetch(`${this.baseURL}/ict-admin/users?${query}`, {
+            headers: { 'Authorization': `Bearer ${this.getToken()}` }
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    async bulkImportUsers(users) {
+        const response = await fetch(`${this.baseURL}/ict-admin/users/bulk-import`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getToken()}`
+            },
+            body: JSON.stringify({ users })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    async resetVotes() {
+        const response = await fetch(`${this.baseURL}/ict-admin/system/reset-votes`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getToken()}`
+            },
+            body: JSON.stringify({ confirmation: 'RESET_ALL_VOTES' })
+        });
+        if (!response.ok) throw new Error('Failed to reset votes');
+        return true;
+    },
+
+    async resetVoterStatuses() {
+        const response = await fetch(`${this.baseURL}/ict-admin/reset-voters`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getToken()}`
+            },
+            body: JSON.stringify({ confirmation: 'RESET_VOTERS' })
+        });
+        if (!response.ok) throw new Error('Failed to reset voter statuses');
+        return true;
+    },
+
+    async resetSystem() {
+        const response = await fetch(`${this.baseURL}/ict-admin/reset-system`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getToken()}`
+            },
+            body: JSON.stringify({ confirmation: 'RESET_SYSTEM' })
+        });
+        if (!response.ok) throw new Error('Failed to reset system');
+        return true;
+    },
+
+    async getSystemStatus() {
+        const response = await fetch(`${this.baseURL}/ict-admin/system-status`, {
+            headers: { 'Authorization': `Bearer ${this.getToken()}` }
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    async updateSystemStatus(status) {
+        const response = await fetch(`${this.baseURL}/ict-admin/system-status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getToken()}`
+            },
+            body: JSON.stringify(status)
+        });
+        if (!response.ok) throw new Error('Failed to update system status');
+        return true;
+    },
+
+    async getBackups(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        const response = await fetch(`${this.baseURL}/backups?${query}`, {
+            headers: { 'Authorization': `Bearer ${this.getToken()}` }
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    async createBackup(backupData) {
+        const response = await fetch(`${this.baseURL}/backups`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getToken()}`
+            },
+            body: JSON.stringify(backupData)
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    async restoreBackup(backupId) {
+        const response = await fetch(`${this.baseURL}/backups/${backupId}/restore`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getToken()}`
+            },
+            body: JSON.stringify({ confirmation: 'RESTORE_BACKUP' })
+        });
+        if (!response.ok) throw new Error('Failed to restore backup');
+        return true;
+    },
+
+    async getAuditLogs(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        const response = await fetch(`${this.baseURL}/ict-admin/audit-logs?${query}`, {
+            headers: { 'Authorization': `Bearer ${this.getToken()}` }
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    async exportSystemData() {
+        const response = await fetch(`${this.baseURL}/ict-admin/export`, {
+            headers: { 'Authorization': `Bearer ${this.getToken()}` }
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    async getPerformanceMetrics() {
+        const response = await fetch(`${this.baseURL}/ict-admin/performance-metrics`, {
+            headers: { 'Authorization': `Bearer ${this.getToken()}` }
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        return data.data;
+    },
+
+    // Token management
+    setToken(token) {
+        localStorage.setItem('auth_token', token);
+        this.token = token;
+    },
+
+    getToken() {
+        return localStorage.getItem('auth_token') || this.token;
+    },
+
+    setRefreshToken(token) {
+        localStorage.setItem('refresh_token', token);
+        this.refreshToken = token;
+    },
+
+    getRefreshToken() {
+        return localStorage.getItem('refresh_token') || this.refreshToken;
+    },
+
+    clearTokens() {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('refresh_token');
+        this.token = null;
+        this.refreshToken = null;
     }
 };
 
 // =============================================
 // Application Initialization
 // =============================================
-
-// Initialize the database
-initDatabase();
 
 document.addEventListener('DOMContentLoaded', function() {
     // Set up module selection
@@ -309,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             try {
-                // Try backend authentication first
+                // Backend authentication
                 const response = await apiClient.login({
                     studentId: studentId,
                     password: 'default' // Voters don't have passwords, use default
@@ -322,18 +445,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.location.href = `Voter-module.html?studentId=${studentId}&backend=true`;
                 }
             } catch (error) {
-                // Fallback to localStorage for backward compatibility
-                console.log('Backend not available, using localStorage fallback');
-                const db = evAPI.getDatabase();
-                const voter = db.voters.find(v => v.id === studentId);
-
-                if (voter) {
-                    localStorage.setItem('user_role', 'student');
-                    localStorage.setItem('student_id', studentId);
-                    window.location.href = `Voter-module.html?studentId=${studentId}`;
-                } else {
-                    alert('Student ID not found. Please contact your administrator.');
-                }
+                console.error('Authentication failed:', error);
+                alert('Authentication failed. Please check your student ID and try again.');
             }
         });
     }
@@ -351,7 +464,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             try {
-                // Try backend authentication first
+                // Backend authentication
                 const response = await apiClient.login({
                     username: username,
                     password: password
@@ -365,18 +478,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert('Invalid admin credentials');
                 }
             } catch (error) {
-                // Fallback to localStorage for backward compatibility
-                console.log('Backend not available, using localStorage fallback');
-                const db = evAPI.getDatabase();
-                const admin = db.admins.find(a => a.username === username && a.password === password && a.status === 'Active');
-
-                if (admin) {
-                    sessionStorage.setItem('ev_admin_user', JSON.stringify(admin));
-                    localStorage.setItem('user_role', 'admin');
-                    window.location.href = 'Admin-module.html';
-                } else {
-                    alert('Invalid admin credentials');
-                }
+                console.error('Authentication failed:', error);
+                alert('Authentication failed. Please check your credentials and try again.');
             }
         });
     }
@@ -394,7 +497,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             try {
-                // Try backend authentication first
+                // Backend authentication
                 const response = await apiClient.login({
                     username: username,
                     password: password
@@ -408,18 +511,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert('Invalid ICT admin credentials');
                 }
             } catch (error) {
-                // Fallback to localStorage for backward compatibility
-                console.log('Backend not available, using localStorage fallback');
-                const db = evAPI.getDatabase();
-                const ictAdmin = db.admins.find(a => a.username === username && a.password === password && a.role === 'ICT Administrator' && a.status === 'Active');
-
-                if (ictAdmin) {
-                    sessionStorage.setItem('ev_ict_admin_user', JSON.stringify(ictAdmin));
-                    localStorage.setItem('user_role', 'ict_admin');
-                    window.location.href = 'ICT-Admin.html';
-                } else {
-                    alert('Invalid ICT admin credentials');
-                }
+                console.error('Authentication failed:', error);
+                alert('Authentication failed. Please check your credentials and try again.');
             }
         });
     }
