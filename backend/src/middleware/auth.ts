@@ -6,6 +6,7 @@ import { AppDataSource } from '../config/database.js';
 export interface AuthenticatedRequest extends Request {
   user?: User;
   tokenPayload?: JWTPayload;
+  headers: any;
 }
 
 // Extend Express Request interface globally

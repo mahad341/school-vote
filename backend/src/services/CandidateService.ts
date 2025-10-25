@@ -276,7 +276,7 @@ export class CandidateService {
   /**
    * Upload candidate photo
    */
-  async uploadCandidatePhoto(id: string, photoFile: Express.Multer.File, uploadedBy: string): Promise<Candidate> {
+  async uploadCandidatePhoto(id: string, photoFile: any, uploadedBy: string): Promise<Candidate> {
     const candidate = await this.candidateRepository.findOne({ where: { id } });
 
     if (!candidate) {
