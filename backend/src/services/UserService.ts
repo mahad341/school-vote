@@ -279,6 +279,28 @@ export class UserService {
   }
 
   /**
+   * Reset all voter statuses (set hasVoted to false for all users)
+   */
+  async resetAllVoterStatuses(resetBy: string): Promise<number> {
+    const result = await this.userRepository.update(
+      {},
+      { hasVoted: false, votedAt: undefined }
+    );
+
+    // Log the reset
+    await this.logAuditEvent({
+      action: AuditAction.SYSTEM_RESET,
+      severity: AuditSeverity.CRITICAL,
+      description: `All voter statuses reset for ${result.affected} users`,
+      userId: resetBy,
+      resourceType: 'system',
+      details: { affectedUsers: result.affected },
+    });
+
+    return result.affected || 0;
+  }
+
+  /**
    * Bulk import users
    */
   async bulkImportUsers(users: CreateUserData[], importedBy: string): Promise<{

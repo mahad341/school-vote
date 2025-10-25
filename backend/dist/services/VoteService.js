@@ -141,6 +141,29 @@ export class VoteService {
         };
     }
     /**
+     * Get all votes with pagination
+     */
+    async getVotes(options = {}) {
+        const { page = 1, limit = 50 } = options;
+        const queryBuilder = this.voteRepository.createQueryBuilder('vote')
+            .leftJoinAndSelect('vote.user', 'user')
+            .leftJoinAndSelect('vote.post', 'post')
+            .leftJoinAndSelect('vote.candidate', 'candidate')
+            .orderBy('vote.createdAt', 'DESC');
+        const offset = (page - 1) * limit;
+        queryBuilder.skip(offset).take(limit);
+        const [votes, total] = await queryBuilder.getManyAndCount();
+        return {
+            votes,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+        };
+    }
+    /**
      * Get votes by candidate
      */
     async getVotesByCandidate(candidateId, options = {}) {

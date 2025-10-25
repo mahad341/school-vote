@@ -180,6 +180,37 @@ export class VoteService {
   }
 
   /**
+   * Get all votes with pagination
+   */
+  async getVotes(options: { page?: number; limit?: number } = {}): Promise<{
+    votes: Vote[];
+    pagination: { page: number; limit: number; total: number; totalPages: number };
+  }> {
+    const { page = 1, limit = 50 } = options;
+
+    const queryBuilder = this.voteRepository.createQueryBuilder('vote')
+      .leftJoinAndSelect('vote.user', 'user')
+      .leftJoinAndSelect('vote.post', 'post')
+      .leftJoinAndSelect('vote.candidate', 'candidate')
+      .orderBy('vote.createdAt', 'DESC');
+
+    const offset = (page - 1) * limit;
+    queryBuilder.skip(offset).take(limit);
+
+    const [votes, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      votes,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /**
    * Get votes by candidate
    */
   async getVotesByCandidate(candidateId: string, options: { page?: number; limit?: number } = {}): Promise<{

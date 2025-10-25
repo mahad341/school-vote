@@ -245,45 +245,73 @@ class ApiClient {
 
     // ICT Admin endpoints
     async importVoters(votersData) {
-        return this.request('/ict/import-voters', {
+        return this.request('/ict-admin/import-voters', {
             method: 'POST',
             body: JSON.stringify(votersData)
         });
     }
 
-    async setSystemStatus(status) {
-        return this.request('/ict/system-status', {
+    async updateSystemStatus(status) {
+        return this.request('/ict-admin/system-status', {
             method: 'PUT',
-            body: JSON.stringify({ status })
+            body: JSON.stringify(status)
         });
+    }
+
+    async getSystemStatus() {
+        return this.request('/ict-admin/system-status');
     }
 
     async getAuditLogs(params = {}) {
         const queryString = new URLSearchParams(params).toString();
-        return this.request(`/ict/audit-logs?${queryString}`);
+        return this.request(`/ict-admin/audit-logs?${queryString}`);
     }
 
     async createBackup() {
-        return this.request('/ict/backup', {
+        return this.request('/ict-admin/system/backup', {
             method: 'POST'
         });
     }
 
     async restoreBackup(backupId) {
-        return this.request('/ict/restore', {
-            method: 'POST',
-            body: JSON.stringify({ backupId })
-        });
-    }
-
-    async resetSystem() {
-        return this.request('/ict/reset-system', {
+        return this.request(`/ict-admin/system/restore/${backupId}`, {
             method: 'POST'
         });
     }
 
+    async resetVotes() {
+        return this.request('/ict-admin/reset-votes', {
+            method: 'POST',
+            body: JSON.stringify({ confirmation: 'RESET_VOTES' })
+        });
+    }
+
+    async resetVoterStatuses() {
+        return this.request('/ict-admin/reset-voters', {
+            method: 'POST',
+            body: JSON.stringify({ confirmation: 'RESET_VOTERS' })
+        });
+    }
+
+    async resetSystem() {
+        return this.request('/ict-admin/reset-system', {
+            method: 'POST',
+            body: JSON.stringify({ confirmation: 'RESET_SYSTEM' })
+        });
+    }
+
+    async clearCache() {
+        return this.request('/ict-admin/cache', {
+            method: 'DELETE'
+        });
+    }
+
+    async exportSystemData() {
+        return this.request('/ict-admin/export');
+    }
+
     async getPerformanceMetrics() {
-        return this.request('/ict/performance-metrics');
+        return this.request('/ict-admin/performance-metrics');
     }
 
     // Socket.io Integration

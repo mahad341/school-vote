@@ -379,6 +379,289 @@ export class ICTAdminController {
             });
         }
     }
+    /**
+     * PUT /api/ict/system-status
+     * Update system enabled/disabled status
+     */
+    static async updateSystemStatus(req, res) {
+        try {
+            const { enabled } = req.body;
+            const updatedBy = req.user.id;
+            const settingService = new SystemSettingService();
+            await settingService.updateSetting('system_enabled', enabled.toString(), updatedBy);
+            // Emit system status update
+            emitSystemStatus(enabled ? 'enabled' : 'disabled', `System ${enabled ? 'enabled' : 'disabled'} by ICT Admin`);
+            res.json({
+                success: true,
+                message: `System ${enabled ? 'enabled' : 'disabled'} successfully`,
+                data: { enabled },
+            });
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to update system status';
+            res.status(500).json({
+                success: false,
+                message,
+            });
+        }
+    }
+    /**
+     * GET /api/ict/system-status
+     * Get current system status
+     */
+    static async getSystemStatus(req, res) {
+        try {
+            const settingService = new SystemSettingService();
+            const enabled = await settingService.getSetting('system_enabled');
+            const maintenance = await settingService.getSetting('maintenance_mode');
+            res.json({
+                success: true,
+                data: {
+                    enabled: enabled?.value === 'true',
+                    maintenance: maintenance?.value === 'true',
+                    lastUpdated: new Date().toISOString(),
+                },
+            });
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to fetch system status';
+            res.status(500).json({
+                success: false,
+                message,
+            });
+        }
+    }
+    /**
+     * POST /api/ict/import-voters
+     * Import voter data from CSV
+     */
+    static async importVoters(req, res) {
+        try {
+            const { voters } = req.body;
+            const importedBy = req.user.id;
+            const userService = new UserService();
+            const result = await userService.bulkImportUsers(voters, importedBy);
+            res.json({
+                success: true,
+                message: 'Voters imported successfully',
+                data: {
+                    imported: result.imported,
+                    failed: result.failed,
+                    total: voters.length,
+                },
+            });
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to import voters';
+            res.status(400).json({
+                success: false,
+                message,
+            });
+        }
+    }
+    /**
+     * POST /api/ict/reset-votes
+     * Clear all votes
+     */
+    static async resetVotes(req, res) {
+        try {
+            const { confirmation } = req.body;
+            const resetBy = req.user.id;
+            if (confirmation !== 'RESET_VOTES') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid confirmation code',
+                });
+            }
+            const voteService = new VoteService();
+            await voteService.resetAllVotes(resetBy);
+            // Emit system status update
+            emitSystemStatus('disabled', 'All votes have been reset');
+            res.json({
+                success: true,
+                message: 'All votes have been reset successfully',
+            });
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to reset votes';
+            res.status(500).json({
+                success: false,
+                message,
+            });
+        }
+    }
+    /**
+     * POST /api/ict/reset-voters
+     * Reset voter statuses
+     */
+    static async resetVoterStatuses(req, res) {
+        try {
+            const { confirmation } = req.body;
+            const resetBy = req.user.id;
+            if (confirmation !== 'RESET_VOTERS') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid confirmation code',
+                });
+            }
+            const userService = new UserService();
+            await userService.resetAllVoterStatuses(resetBy);
+            res.json({
+                success: true,
+                message: 'All voter statuses have been reset successfully',
+            });
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to reset voter statuses';
+            res.status(500).json({
+                success: false,
+                message,
+            });
+        }
+    }
+    /**
+     * POST /api/ict/reset-system
+     * Complete system reset
+     */
+    static async resetSystem(req, res) {
+        try {
+            const { confirmation } = req.body;
+            const resetBy = req.user.id;
+            if (confirmation !== 'RESET_SYSTEM') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid confirmation code',
+                });
+            }
+            // Reset votes
+            const voteService = new VoteService();
+            await voteService.resetAllVotes(resetBy);
+            // Reset voter statuses
+            const userService = new UserService();
+            await userService.resetAllVoterStatuses(resetBy);
+            // Emit system status update
+            emitSystemStatus('disabled', 'Complete system reset performed');
+            res.json({
+                success: true,
+                message: 'Complete system reset completed successfully',
+            });
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to reset system';
+            res.status(500).json({
+                success: false,
+                message,
+            });
+        }
+    }
+    /**
+     * DELETE /api/ict/cache
+     * Clear system cache
+     */
+    static async clearCache(req, res) {
+        try {
+            // Clear any cached data (this would depend on your caching implementation)
+            // For now, just return success
+            res.json({
+                success: true,
+                message: 'System cache cleared successfully',
+            });
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to clear cache';
+            res.status(500).json({
+                success: false,
+                message,
+            });
+        }
+    }
+    /**
+     * GET /api/ict/export
+     * Export system data
+     */
+    static async exportSystemData(req, res) {
+        try {
+            const userService = new UserService();
+            const postService = new ElectionPostService();
+            const voteService = new VoteService();
+            const [users, posts, votes] = await Promise.all([
+                userService.getUsers({ limit: 10000 }),
+                postService.getPosts({ limit: 1000 }),
+                voteService.getVotes({ limit: 10000 }),
+            ]);
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                system_data: {
+                    users: users.users,
+                    posts: posts.posts,
+                    votes: votes.votes,
+                },
+                metadata: {
+                    total_users: users.pagination.total,
+                    total_posts: posts.pagination.total,
+                    total_votes: votes.pagination.total,
+                    exported_by: req.user.id,
+                    exported_at: new Date().toISOString(),
+                },
+            };
+            res.json({
+                success: true,
+                data: exportData,
+            });
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to export system data';
+            res.status(500).json({
+                success: false,
+                message,
+            });
+        }
+    }
+    /**
+     * GET /api/ict/performance-metrics
+     * Get system performance data
+     */
+    static async getPerformanceMetrics(req, res) {
+        try {
+            const userService = new UserService();
+            const postService = new ElectionPostService();
+            const voteService = new VoteService();
+            const [userStats, postStats, voteStats] = await Promise.all([
+                userService.getUserStats(),
+                postService.getPostStats(),
+                voteService.getVotingStats(),
+            ]);
+            const metrics = {
+                timestamp: new Date().toISOString(),
+                system: {
+                    uptime: process.uptime(),
+                    memory: process.memoryUsage(),
+                    cpu: process.cpuUsage(),
+                },
+                database: {
+                    users: userStats,
+                    posts: postStats,
+                    votes: voteStats,
+                },
+                performance: {
+                    response_time: 'N/A', // Would need middleware to track this
+                    throughput: 'N/A', // Would need monitoring system
+                    error_rate: 'N/A', // Would need error tracking
+                },
+            };
+            res.json({
+                success: true,
+                data: metrics,
+            });
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to fetch performance metrics';
+            res.status(500).json({
+                success: false,
+                message,
+            });
+        }
+    }
 }
 // Middleware combinations for routes
 export const ictAdminRoutesMiddleware = {

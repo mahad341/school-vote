@@ -29,4 +29,22 @@ router.post('/system/restore/:backupId', ICTAdminController.restoreBackup);
 router.get('/audit-logs', ICTAdminController.getAuditLogs);
 // POST /api/ict-admin/system/maintenance - Toggle system maintenance mode
 router.post('/system/maintenance', ICTAdminController.toggleMaintenanceMode);
+// PUT /api/ict/system-status - Update system enabled/disabled status
+router.put('/system-status', ICTAdminController.updateSystemStatus);
+// GET /api/ict/system-status - Get current system status
+router.get('/system-status', ICTAdminController.getSystemStatus);
+// POST /api/ict/import-voters - Import voter data from CSV
+router.post('/import-voters', ICTAdminController.importVoters);
+// POST /api/ict/reset-votes - Clear all votes
+router.post('/reset-votes', ICTAdminController.resetVotes);
+// POST /api/ict/reset-voters - Reset voter statuses
+router.post('/reset-voters', ICTAdminController.resetVoterStatuses);
+// POST /api/ict/reset-system - Complete system reset
+router.post('/reset-system', ICTAdminController.resetSystem);
+// DELETE /api/ict/cache - Clear system cache
+router.delete('/cache', ICTAdminController.clearCache);
+// GET /api/ict/export - Export system data
+router.get('/export', ICTAdminController.exportSystemData);
+// GET /api/ict/performance-metrics - Get system performance data
+router.get('/performance-metrics', ICTAdminController.getPerformanceMetrics);
 export default router;

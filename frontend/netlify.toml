@@ -3,11 +3,11 @@
   command = "echo 'No build step required'"
 
 [build.environment]
-  BACKEND_URL = "https://my-evote-backend.onrender.com"
+  BACKEND_URL = "https://e-voting-backend-6ujp.onrender.com"
 
 [[redirects]]
   from = "/api/*"
-  to = "https://my-evote-backend.onrender.com/api/:splat"
+  to = "https://e-voting-backend-6ujp.onrender.com/api/:splat"
   status = 200
 
 [[headers]]
