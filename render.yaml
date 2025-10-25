@@ -16,7 +16,7 @@ services:
       - key: DB_USER
         fromDatabase:
           name: e-voting-db
-          property: username
+          property: user
       - key: DB_PASSWORD
         fromDatabase:
           name: e-voting-db
@@ -39,9 +39,9 @@ services:
           name: e-voting-redis
           property: connectionString
 
-  - type: pserv
+  - type: redis
     name: e-voting-redis
-    runtime: redis
+    plan: free
 
 databases:
   - name: e-voting-db
