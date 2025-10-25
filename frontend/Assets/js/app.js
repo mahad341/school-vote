@@ -22,19 +22,6 @@ const apiClient = {
         return data;
     },
 
-    async register(userData) {
-        const response = await fetch(`${this.baseURL}/auth/register`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.getToken()}`
-            },
-            body: JSON.stringify(userData)
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message);
-        return data;
-    },
 
     async logout() {
         const response = await fetch(`${this.baseURL}/auth/logout`, {
@@ -434,14 +421,11 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 // Backend authentication
                 const response = await apiClient.login({
-                    studentId: studentId,
-                    password: 'default' // Voters don't have passwords, use default
+                    studentId: studentId
                 });
 
                 if (response.token) {
                     // Backend authentication successful
-                    localStorage.setItem('user_role', 'student');
-                    localStorage.setItem('student_id', studentId);
                     window.location.href = `Voter-module.html?studentId=${studentId}&backend=true`;
                 }
             } catch (error) {
@@ -471,8 +455,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 if (response.user && response.user.role === 'admin') {
-                    localStorage.setItem('user_role', 'admin');
-                    localStorage.setItem('admin_user', JSON.stringify(response.user));
                     window.location.href = 'Admin-module.html?backend=true';
                 } else {
                     alert('Invalid admin credentials');
@@ -504,8 +486,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 if (response.user && response.user.role === 'ict_admin') {
-                    localStorage.setItem('user_role', 'ict_admin');
-                    localStorage.setItem('ict_admin_user', JSON.stringify(response.user));
                     window.location.href = 'ICT-Admin.html?backend=true';
                 } else {
                     alert('Invalid ICT admin credentials');
