@@ -7,9 +7,9 @@ services:
     startCommand: npm start
     envVars:
       - key: NODE_ENV
-        value: production
+        value: development
       - key: PORT
-        generateValue: true
+        value: 3000
       - key: DB_HOST
         fromDatabase:
           name: e-voting-db
