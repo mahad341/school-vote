@@ -12,10 +12,23 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME,
   synchronize: process.env.NODE_ENV === 'development',
   logging: process.env.NODE_ENV === 'development',
-  entities: ['src/models/**/*.ts'],
-  migrations: ['src/migrations/**/*.ts'],
-  subscribers: ['src/subscribers/**/*.ts'],
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  entities: ['dist/models/**/*.js'],
+  migrations: ['dist/migrations/**/*.js'],
+  subscribers: ['dist/subscribers/**/*.js'],
+  ssl: process.env.NODE_ENV === 'production' ? {
+    rejectUnauthorized: false,
+    ca: process.env.DB_SSL_CA,
+    cert: process.env.DB_SSL_CERT,
+    key: process.env.DB_SSL_KEY
+  } : false,
+  extra: process.env.NODE_ENV === 'production' ? {
+    ssl: {
+      rejectUnauthorized: false,
+      ca: process.env.DB_SSL_CA,
+      cert: process.env.DB_SSL_CERT,
+      key: process.env.DB_SSL_KEY
+    }
+  } : undefined,
 });
 
 export const connectDatabase = async () => {

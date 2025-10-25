@@ -36,7 +36,7 @@
     "redis": "^4.6.10",
     "reflect-metadata": "^0.2.2",
     "socket.io": "^4.7.4",
-    "swagger-jsdoc": "^6.2.8",
+    "swagger-jsdoc": "^3.7.0",
     "swagger-ui-express": "^5.0.0",
     "typeorm": "^0.3.27",
     "winston": "^3.11.0"
