@@ -73,7 +73,7 @@ __decorate([
     __metadata("design:type", Object)
 ], Vote.prototype, "metadata", void 0);
 __decorate([
-    Column({ type: 'inet', nullable: true }),
+    Column({ type: 'varchar', nullable: true }),
     __metadata("design:type", String)
 ], Vote.prototype, "ipAddress", void 0);
 __decorate([

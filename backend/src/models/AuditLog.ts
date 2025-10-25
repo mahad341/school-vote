@@ -76,7 +76,7 @@ export class AuditLog {
   @Column({ type: 'jsonb', nullable: true })
   details?: object; // Additional context data
 
-  @Column({ type: 'inet', nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   ipAddress?: string;
 
   @Column({ length: 500, nullable: true })

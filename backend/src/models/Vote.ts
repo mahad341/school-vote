@@ -40,7 +40,7 @@ export class Vote {
   @Column({ type: 'json', nullable: true })
   metadata?: object; // Additional vote metadata
 
-  @Column({ type: 'inet', nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   ipAddress?: string; // For audit and security
 
   @Column({ length: 500, nullable: true })

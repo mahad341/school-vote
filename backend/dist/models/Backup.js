@@ -79,7 +79,7 @@ __decorate([
     __metadata("design:type", String)
 ], Backup.prototype, "status", void 0);
 __decorate([
-    Column({ type: 'bigint' }),
+    Column({ type: 'numeric' }),
     __metadata("design:type", Number)
 ], Backup.prototype, "fileSize", void 0);
 __decorate([

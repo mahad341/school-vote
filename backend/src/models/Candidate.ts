@@ -50,7 +50,7 @@ export class Candidate {
   @Column({ default: 0 })
   voteCount!: number;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2, default: 0 })
+  @Column({ type: 'numeric', precision: 5, scale: 2, default: 0 })
   votePercentage!: number;
 
   @Column({ type: 'int', nullable: true })

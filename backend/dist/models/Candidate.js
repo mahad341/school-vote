@@ -92,7 +92,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Candidate.prototype, "voteCount", void 0);
 __decorate([
-    Column({ type: 'decimal', precision: 5, scale: 2, default: 0 }),
+    Column({ type: 'numeric', precision: 5, scale: 2, default: 0 }),
     __metadata("design:type", Number)
 ], Candidate.prototype, "votePercentage", void 0);
 __decorate([

@@ -112,7 +112,7 @@ __decorate([
     __metadata("design:type", Object)
 ], AuditLog.prototype, "details", void 0);
 __decorate([
-    Column({ type: 'inet', nullable: true }),
+    Column({ type: 'varchar', nullable: true }),
     __metadata("design:type", String)
 ], AuditLog.prototype, "ipAddress", void 0);
 __decorate([

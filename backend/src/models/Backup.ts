@@ -38,7 +38,7 @@ export class Backup {
   })
   status!: BackupStatus;
 
-  @Column({ type: 'bigint' })
+  @Column({ type: 'numeric' })
   fileSize!: number; // Size in bytes
 
   @Column({ type: 'text', nullable: true })
