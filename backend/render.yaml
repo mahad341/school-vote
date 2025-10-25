@@ -2,6 +2,7 @@ services:
   - type: web
     name: e-voting-backend
     runtime: node
+    rootDir: backend
     buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:
@@ -16,7 +17,7 @@ services:
       - key: DB_USER
         fromDatabase:
           name: e-voting-db
-          property: username
+          property: user
       - key: DB_PASSWORD
         fromDatabase:
           name: e-voting-db
@@ -39,12 +40,15 @@ services:
           name: e-voting-redis
           property: connectionString
 
-  - type: pserv
+  - type: redis
     name: e-voting-redis
-    runtime: redis
+    plan: free
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: Allow all internal connections
 
 databases:
   - name: e-voting-db
     databaseName: e_voting_db
     user: e_voting_user
-    plan: starter
+    plan: free
