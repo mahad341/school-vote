@@ -42,6 +42,9 @@ services:
   - type: redis
     name: e-voting-redis
     plan: free
+    ipAllowList: # 👈 Required field
+      - source: 0.0.0.0/0
+        description: Allow all internal connections
 
 databases:
   - name: e-voting-db
