@@ -1,0 +1,50 @@
+services:
+  - type: web
+    name: e-voting-backend
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        generateValue: true
+      - key: DB_HOST
+        fromDatabase:
+          name: e-voting-db
+          property: host
+      - key: DB_USER
+        fromDatabase:
+          name: e-voting-db
+          property: username
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: e-voting-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: e-voting-db
+          property: database
+      - key: DB_PORT
+        fromDatabase:
+          name: e-voting-db
+          property: port
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: https://school-evote.netlify.app
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: e-voting-redis
+          property: connectionString
+
+  - type: pserv
+    name: e-voting-redis
+    runtime: redis
+
+databases:
+  - name: e-voting-db
+    databaseName: e_voting_db
+    user: e_voting_user
+    plan: starter
