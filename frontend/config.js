@@ -1,3 +1,3 @@
-const BACKEND_URL = "https://my-evote-backend.onrender.com";
+const BACKEND_URL = "https://e-voting-backend-6ujp.onrender.com";
 
 export { BACKEND_URL };
