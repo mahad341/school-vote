@@ -79,10 +79,10 @@ export class AuditLog {
   @Column({ type: 'varchar', nullable: true })
   ipAddress?: string;
 
-  @Column({ length: 500, nullable: true })
+  @Column({ type: 'varchar', length: 500, nullable: true })
   userAgent?: string;
 
-  @Column({ name: 'userId', nullable: true })
+  @Column({ name: 'userId', type: 'varchar', nullable: true })
   userId?: string;
 
   @ManyToOne('User', 'auditLogs', { onDelete: 'SET NULL' })

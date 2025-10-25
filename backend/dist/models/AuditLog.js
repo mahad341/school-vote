@@ -116,11 +116,11 @@ __decorate([
     __metadata("design:type", String)
 ], AuditLog.prototype, "ipAddress", void 0);
 __decorate([
-    Column({ length: 500, nullable: true }),
+    Column({ type: 'varchar', length: 500, nullable: true }),
     __metadata("design:type", String)
 ], AuditLog.prototype, "userAgent", void 0);
 __decorate([
-    Column({ name: 'userId', nullable: true }),
+    Column({ name: 'userId', type: 'varchar', nullable: true }),
     __metadata("design:type", String)
 ], AuditLog.prototype, "userId", void 0);
 __decorate([
